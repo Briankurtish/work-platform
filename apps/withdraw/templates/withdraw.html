@@ -1,0 +1,64 @@
+{% extends layout_path %}
+
+{% load static %}
+{% load i18n %}
+
+{% block title %}Withdraw{% endblock title %}
+
+{% block vendor_css %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'vendor/libs/apex-charts/apex-charts.css' %}" />
+{% endblock vendor_css %}
+
+{% block vendor_js %}
+{{ block.super }}
+<script src="{% static 'vendor/libs/apex-charts/apexcharts.js' %}"></script>
+{% endblock vendor_js %}
+
+{% block page_js %}
+{{ block.super }}
+<script src="{% static 'js/dashboards-analytics.js' %}"></script>
+{% endblock page_js %}
+
+{% block content %}
+<div class="row gy-6">
+  {% comment %} <h3 class=" mb-0 flex-wrap text-nowrap">Recharge Acocunt</h3> {% endcomment %}
+
+  <div class="row">
+    <div class="col-xl">
+      <div class="card mb-6">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">Withdraw</h5> 
+        </div>
+        <div class="card-body">
+          <form>
+            {% csrf_token %}
+            <div class="form-floating form-floating-outline mb-6">
+              <select class="form-select" id="exampleFormControlSelect1" aria-label="Default select example">
+                <option selected>Select Crypto Wallet</option>
+                <option value="1">Bitcoin - BTC</option>
+                <option value="2">USDT - TRC20</option>
+                <option value="3">Etherium - ERC-20</option>
+              </select>
+              <label for="exampleFormControlSelect1">Crypto  Wallet</label>
+            </div>
+
+            <div class="form-floating form-floating-outline mb-6">
+              <input type="text" class="form-control" id="basic-default-address" placeholder="John Doe" />
+              <label for="basic-default-address">Wallet Address</label>
+            </div>
+            
+            <div class="form-floating form-floating-outline mb-6">
+              <input type="text" class="form-control" id="basic-default-amount" placeholder="John Doe" />
+              <label for="basic-default-amount">Amount</label>
+              <p class='mt-2'>Available Profit: $300</p>
+            </div>
+           
+            <button type="submit" class="btn btn-primary">Withdraw</button>
+          </form>
+        </div>
+      </div>
+  </div>
+
+</div>
+{% endblock %}
