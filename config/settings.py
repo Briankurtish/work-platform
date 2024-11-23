@@ -202,6 +202,10 @@ THEME_LAYOUT_DIR = THEME_LAYOUT_DIR
 THEME_VARIABLES = THEME_VARIABLES
 
 
+MEDIA_ROOT = (BASE_DIR / 'media/')
+
+MEDIA_URL = '/media/'
+
 
 # Your stuff...
 # ------------------------------------------------------------------------------

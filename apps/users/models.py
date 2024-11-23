@@ -8,6 +8,7 @@ from apps.manage_plans.models import Plan
 
 class Profile(models.Model):
     client = models.OneToOneField(User, on_delete=models.CASCADE, null=True)
+    balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
     address = models.CharField(max_length=200, null=True)
     phone = models.CharField(max_length=20, null=True)
     plan = models.ForeignKey(Plan, on_delete=models.SET_NULL, null=True, blank=True)
