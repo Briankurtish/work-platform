@@ -43,7 +43,7 @@ urlpatterns = [
     path("", include("apps.tasks.urls")),
     
     # User List urls
-    path("", include("apps.users.urls")),
+    path("", include("apps.clients.urls")),
     
     # Manage Deposits urls
     path("", include("apps.manage_deposits.urls")),

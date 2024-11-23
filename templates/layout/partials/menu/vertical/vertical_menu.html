@@ -28,12 +28,13 @@
       </a>
     </li>
 
-    <li class="menu-item {% if '/users-list/' in request.path %}active open{% endif %}">
-      <a href="{% url 'users' %}" class="menu-link ">
-        <i class="menu-icon tf-icons ri-user-line"></i>
-        <div class="text-truncate" data-i18n="Dashboards">Users</div>
+    <li class="menu-item {% if 'manage-clients' == request.resolver_match.url_name or '/manage-clients/' in request.path %}active open{% endif %}">
+      <a href="{% url 'manage-clients' %}" class="menu-link ">
+        <i class="menu-icon tf-icons ri-group-line"></i>
+        <div class="text-truncate" data-i18n="Dashboards">Clients</div>
       </a>
     </li>
+
 
     {% comment %} <li class="menu-item {% if 'user-list' == request.resolver_match.url_name or '/dashbord/' in request.path %}active open{% endif %}">
       <a href="{% url 'index' %}" class="menu-link ">

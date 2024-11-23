@@ -1,21 +1,23 @@
+from django.shortcuts import render
 from django.views.generic import TemplateView
 from web_project import TemplateLayout
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.shortcuts import render, redirect
+from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 
 
 
-
+# Create your views here.
 @login_required
-def ManageUserView(request):
-    products = Product.objects.all()
+def ManageUsersView(request):
+    clients = User.objects.all().select_related('profile')
 
     # Create a new context dictionary for this view 
     view_context = {
-        "products": products,
+        "clients": clients,
     }
 
     # Initialize the template layout and merge the view context
     context = TemplateLayout.init(request, view_context)
 
-    return render(request, 'manage_products.html', context)
+    return render(request, 'manage-users.html', context)
