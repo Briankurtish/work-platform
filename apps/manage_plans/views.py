@@ -69,6 +69,35 @@ def update_plan_view(request, pk):
     return render(request, 'update_plan.html', context)
 
 
+
+def subscribe_to_plan(self, plan):
+    """
+    Assign a plan to the user's profile and handle additional logic.
+    
+    Args:
+        plan (PlanModel): The plan to subscribe the user to.
+    """
+    if not plan:
+        raise ValueError("Plan must be provided to subscribe.")
+    
+    # Assign the plan to the user
+    self.plan = plan
+    
+    # Perform any additional actions, such as adjusting the user's balance
+    # if the plan has a cost or logging the subscription event.
+    # if plan.cost > 0:  # Assuming the Plan model has a `cost` field
+    #     if self.balance < plan.cost:
+    #         raise ValueError("Insufficient balance to subscribe to this plan.")
+    #     self.balance -= plan.cost  # Deduct the plan cost from the user's balance
+    
+    # Save the changes
+    self.save()
+
+    # Optionally log the subscription
+    print(f"{self.client.username} subscribed to {plan.name} plan.")
+
+
+
 # class ManagePlansView(LoginRequiredMixin,TemplateView):
 #     # Predefined function
 #     def get_context_data(self, **kwargs):

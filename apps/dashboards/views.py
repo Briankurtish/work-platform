@@ -1,6 +1,7 @@
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from web_project import TemplateLayout
+from apps.manage_plans.models import Plan
 
 class DashboardsView(LoginRequiredMixin, TemplateView):
     # Default template if no specific role is matched
@@ -25,4 +26,12 @@ class DashboardsView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         # Call the parent method and initialize the global layout
         context = TemplateLayout.init(self, super().get_context_data(**kwargs))
+        
+        # Fetch the logged-in user's profile and plan
+        if hasattr(self.request.user, "profile"):  # Ensure the user has a profile
+            profile = self.request.user.profile
+            context["user_plan"] = profile.plan  # The plan the user is subscribed to
+        else:
+            context["user_plan"] = None  # No profile or plan
+
         return context

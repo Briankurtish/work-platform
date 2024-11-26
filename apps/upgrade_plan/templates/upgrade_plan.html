@@ -8,11 +8,25 @@
 {% block vendor_css %}
 {{ block.super }}
 <link rel="stylesheet" href="{% static 'vendor/libs/apex-charts/apex-charts.css' %}" />
+<style>
+  /* Custom CSS for positioning the toast at the bottom right */
+  .toast-container {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    z-index: 1050;  /* Ensure it's above other elements */
+  }
+
+  .toast {
+    margin-bottom: 10px;  /* Space between toasts if multiple appear */
+  }
+</style>
 {% endblock vendor_css %}
 
 {% block vendor_js %}
 {{ block.super }}
 <script src="{% static 'vendor/libs/apex-charts/apexcharts.js' %}"></script>
+<script src="{% static 'js/ui-toasts.js' %}"></script>
 {% endblock vendor_js %}
 
 {% block page_js %}
@@ -22,71 +36,44 @@
 
 {% block content %}
 <div class="row gy-6">
-  {% comment %} <h3 class=" mb-0 flex-wrap text-nowrap">Recharge Acocunt</h3> {% endcomment %}
+  <h5 class="pb-1 mb-1">Available Plans</h5>
+  <div class="row mb-12 g-6">
+    {% for plan in plans %}
+    <div class="col-md-6 col-lg-4">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">{{ plan.name }}</h5>
+          <p class="card-text">{{ plan.description|default:"No description available." }}</p>
+          <p class="card-text"><strong>Price:</strong> ${{ plan.price }}</p>
+          <p class="card-text"><strong>Profit:</strong> ${{ plan.profit }}</p>
+          <p class="card-text"><strong>Clicks:</strong> {{ plan.number_of_clicks }} Clicks</p>
+          <form method="post" action="">
+            {% csrf_token %}
+            <input type="hidden" name="plan_id" value="{{ plan.id }}">
+            <button type="submit" class="btn btn-primary">Select Plan</button>
+          </form>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
 
-<!-- Text alignment -->
-<h5 class="pb-1 mb-6">Available Plans</h5>
-<div class="row mb-12 g-6">
-  <div class="col-md-6 col-lg-4">
-    <div class="card">
-      <div class="card-body">
-        <h5 class="card-title">Classic Plan</h5>
-        <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-        <a href="javascript:void(0)" class="btn btn-primary">Select Plan</a>
+  {% if messages %}
+  <!-- Toast container to hold all toasts -->
+  <div class="toast-container">
+    <div class="bs-toast toast fade show" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="toast-header">
+        <i class="ri-checkbox-circle-fill text-success me-2"></i>
+        <div class="me-auto fw-medium">Success</div>
+        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+      <div class="toast-body">
+        {% for message in messages %}
+          <p>{{ message }}</p>
+        {% endfor %}
       </div>
     </div>
   </div>
-  <div class="col-md-6 col-lg-4">
-    <div class="card">
-      <div class="card-body">
-        <h5 class="card-title">Semi Pro Plan</h5>
-        <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-        <a href="javascript:void(0)" class="btn btn-primary">Select Plan</a>
-      </div>
-    </div>
-  </div>
-  <div class="col-md-6 col-lg-4">
-    <div class="card">
-      <div class="card-body">
-        <h5 class="card-title">Pro Plan</h5>
-        <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-        <a href="javascript:void(0)" class="btn btn-primary">Select Plan</a>
-      </div>
-    </div>
-  </div>
+  {% endif %}
 </div>
-<!--/ Text alignment -->
-
-<div class="row mb-12 g-6">
-  <div class="col-md-6 col-lg-4">
-    <div class="card">
-      <div class="card-body">
-        <h5 class="card-title">Classic Plan</h5>
-        <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-        <a href="javascript:void(0)" class="btn btn-primary">Select Plan</a>
-      </div>
-    </div>
-  </div>
-  <div class="col-md-6 col-lg-4">
-    <div class="card">
-      <div class="card-body">
-        <h5 class="card-title">Semi Pro Plan</h5>
-        <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-        <a href="javascript:void(0)" class="btn btn-primary">Select Plan</a>
-      </div>
-    </div>
-  </div>
-  <div class="col-md-6 col-lg-4">
-    <div class="card">
-      <div class="card-body">
-        <h5 class="card-title">Pro Plan</h5>
-        <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-        <a href="javascript:void(0)" class="btn btn-primary">Select Plan</a>
-      </div>
-    </div>
-  </div>
-</div>
-<!--/ Text alignment -->
-
-</div>
-{% endblock %}
+{% endblock content %}
