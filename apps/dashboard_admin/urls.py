@@ -1,13 +1,10 @@
 from django.urls import path
 from .views import AdminDashboardView
 
-
-
 urlpatterns = [
-    
     path(
         "index-admin/",
-        AdminDashboardView.as_view(template_name="dashboard_admin.html"),
+        AdminDashboardView.as_view(),  # Correct use of as_view()
         name="index-admin",
     )
 ]

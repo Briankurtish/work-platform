@@ -28,7 +28,7 @@
       <div class="card-body text-nowrap">
         <h5 class="card-title mb-0 flex-wrap text-nowrap">Total Deposits</h5>
         <p class="mb-2">The total amount of money deposited</p>
-        <h4 class="text-primary mb-0">$42.8k</h4>
+        <h4 class="text-primary mb-0">${{ total_deposit_amount }}</h4>
         <br>
         <a href="javascript:;" class="btn btn-sm btn-primary">View Deposits</a>
       </div>
@@ -80,7 +80,7 @@
               </div>
               <div class="ms-3">
                 <p class="mb-0">Customers</p>
-                <h5 class="mb-0">12.5k</h5>
+                <h5 class="mb-0">{{ total_users }}</h5>
               </div>
             </div>
           </div>
@@ -93,7 +93,7 @@
               </div>
               <div class="ms-3">
                 <p class="mb-0">Withdrwals</p>
-                <h5 class="mb-0">$1.54k</h5>
+                <h5 class="mb-0">{{ approved_withdrawals }}</h5>
               </div>
             </div>
           </div>
@@ -106,7 +106,7 @@
               </div>
               <div class="ms-3">
                 <p class="mb-0">Products</p>
-                <h5 class="mb-0">88k</h5>
+                <h5 class="mb-0">{{ total_products }}</h5>
               </div>
             </div>
           </div>

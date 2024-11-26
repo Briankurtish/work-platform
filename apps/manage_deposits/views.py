@@ -4,6 +4,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.shortcuts import redirect, get_object_or_404
 from django.contrib import messages
 from apps.recharge_account.models import Deposit
+from django.db.models import Sum
+
 
 class ManageDepositsView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     template_name = "manage_deposits.html"
@@ -15,6 +17,11 @@ class ManageDepositsView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
 
         # Fetch all deposit requests from the database
         context['deposits'] = Deposit.objects.all().order_by('-created_at')
+        context['total_deposits'] = Deposit.objects.count()
+        context['total_deposit_amount'] = Deposit.objects.aggregate(total_amount=Sum('amount'))['total_amount'] or 0
+        # Total Approved Deposits
+        context['total_approved_deposits'] = Deposit.objects.filter(status='Approved').count()
+        context['total_approved_deposit_amount'] = Deposit.objects.filter(status='Approved').aggregate(total_amount=Sum('amount'))['total_amount'] or 0
         return context
 
     def test_func(self):
