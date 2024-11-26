@@ -39,7 +39,7 @@ class UpgradePlanView(LoginRequiredMixin, TemplateView):
         # Subscribe the user to the selected plan
         try:
             profile.subscribe_to_plan(plan)  # Use the method defined in the Profile model
-            messages.success(request, f"You have successfully subscribed to the {plan.name} plan.")
+            messages.success(request, "You have successfully upgraded your plan.", extra_tags='plan_upgrade')
         except ValueError as e:
             messages.error(request, str(e))
         

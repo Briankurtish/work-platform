@@ -31,7 +31,9 @@ class DashboardsView(LoginRequiredMixin, TemplateView):
         if hasattr(self.request.user, "profile"):  # Ensure the user has a profile
             profile = self.request.user.profile
             context["user_plan"] = profile.plan  # The plan the user is subscribed to
+            context["user_balance"] = profile.balance  # Add the balance to the context
         else:
             context["user_plan"] = None  # No profile or plan
+            context["user_balance"] = 0  # If no balance, set it to 0
 
         return context

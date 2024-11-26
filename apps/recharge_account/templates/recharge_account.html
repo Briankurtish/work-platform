@@ -8,6 +8,19 @@
 {% block vendor_css %}
 {{ block.super }}
 <link rel="stylesheet" href="{% static 'vendor/libs/apex-charts/apex-charts.css' %}" />
+<style>
+  /* Custom CSS for positioning the toast at the bottom right */
+  .toast-container {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    z-index: 1050;  /* Ensure it's above other elements */
+  }
+
+  .toast {
+    margin-bottom: 10px;  /* Space between toasts if multiple appear */
+  }
+</style>
 {% endblock vendor_css %}
 
 {% block vendor_js %}
@@ -31,19 +44,20 @@
           <h5 class="mb-0">Recharge Account</h5> 
         </div>
         <div class="card-body">
-          <form>
+          <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="form-floating form-floating-outline mb-6">
-              <select class="form-select" id="exampleFormControlSelect1" aria-label="Default select example">
-                <option selected>Select crypto wallet</option>
-                <option value="1">Bitcoin - BTC</option>
-                <option value="2">USDT - TRC20</option>
-                <option value="3">Etherium - ERC-20</option>
+              <select class="form-select" id="crypto_wallet" name="crypto_wallet" required>
+                  <option value="" selected>Select crypto wallet</option>
+                  <option value="Bitcoin - BTC">Bitcoin - BTC</option>
+                  <option value="USDT - TRC20">USDT - TRC20</option>
+                  <option value="Etherium - ERC-20">Etherium - ERC-20</option>
               </select>
-              <label for="exampleFormControlSelect1">Crypto Wallet</label>
-            </div>
+              <label for="crypto_wallet">Crypto Wallet</label>
+          </div>
 
-            <div class="row">
+            <div class="row mt-3 mb-3">
+              <hr>
               <div class="col-md-4">
                 <div>
                   <p class='text-warning'>Btc Wallet - BTC Network</p>
@@ -64,18 +78,42 @@
                   <p>0x6Esdkgigiugsd6786tb</p>
                 </div>
               </div>
+              <hr>
             </div>
             
             <div class="form-floating form-floating-outline mb-6">
-              <input type="text" class="form-control" id="basic-default-amount" placeholder="John Doe" />
-              <label for="basic-default-amount">Amount</label>
-            </div>
+              <input type="number" class="form-control" id="amount" name="amount" placeholder="Enter amount" required />
+              <label for="amount">Amount</label>
+          </div>
+
+            <div class="mb-4">
+              <label for="proof_of_payment" class="form-label">Proof of Payment</label>
+              <input class="form-control" type="file" id="proof_of_payment" name="proof_of_payment" required>
+          </div>
            
             <button type="submit" class="btn btn-primary">Recharge Account</button>
           </form>
         </div>
       </div>
   </div>
+
+  {% if messages %}
+  <!-- Toast container to hold all toasts -->
+  <div class="toast-container">
+    <div class="bs-toast toast fade show" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="toast-header">
+        <i class="ri-checkbox-circle-fill text-success me-2"></i>
+        <div class="me-auto fw-medium">Success</div>
+        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+      <div class="toast-body">
+        {% for message in messages %}
+          <p>{{ message }}</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
 
 </div>
 {% endblock %}
