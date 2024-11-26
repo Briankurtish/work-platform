@@ -7,7 +7,7 @@ urlpatterns = [
     
     path(
         "withdraw/",
-        WithdrawView.as_view(template_name="withdraw.html"),
+        WithdrawView.as_view(),
         name="withdraw",
     )
 ]

@@ -1,19 +1,19 @@
 from django.views.generic import TemplateView
-from web_project import TemplateLayout
 from django.contrib.auth.mixins import LoginRequiredMixin
+from apps.withdraw.models import WithdrawalRequest  # Import the WithdrawalRequest model
+from web_project import TemplateLayout
 
+class WithdrawalHistoryView(LoginRequiredMixin, TemplateView):
+    template_name = "withdrawal_history.html"  # Make sure to specify your template name
 
-"""
-This file is a view controller for multiple pages as a module.
-Here you can override the page view layout.
-Refer to dashboards/urls.py file for more pages.
-"""
-
-
-class WithdrawalHistoryView(LoginRequiredMixin,TemplateView):
-    # Predefined function
     def get_context_data(self, **kwargs):
-        # A function to init the global layout. It is defined in web_project/__init__.py file
+        # Initialize the global layout context
         context = TemplateLayout.init(self, super().get_context_data(**kwargs))
+
+        # Fetch all withdrawal requests made by the logged-in user
+        withdrawals = WithdrawalRequest.objects.filter(user=self.request.user).order_by('-created_at')
+
+        # Add withdrawals to the context
+        context["withdrawals"] = withdrawals
 
         return context
