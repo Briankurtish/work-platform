@@ -1,21 +1,20 @@
 from django.views.generic import TemplateView
 from web_project import TemplateLayout
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.decorators import login_required
 
 
 
+"""
+This file is a view controller for multiple pages as a module.
+Here you can override the page view layout.
+Refer to dashboards/urls.py file for more pages.
+"""
 
-@login_required
-def ManageUserView(request):
-    products = Product.objects.all()
 
-    # Create a new context dictionary for this view 
-    view_context = {
-        "products": products,
-    }
+class ManageDepositsView(LoginRequiredMixin,TemplateView):
+    # Predefined function
+    def get_context_data(self, **kwargs):
+        # A function to init the global layout. It is defined in web_project/__init__.py file
+        context = TemplateLayout.init(self, super().get_context_data(**kwargs))
 
-    # Initialize the template layout and merge the view context
-    context = TemplateLayout.init(request, view_context)
-
-    return render(request, 'manage_products.html', context)
+        return context
