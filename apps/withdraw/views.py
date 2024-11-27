@@ -1,3 +1,5 @@
+from sib_api_v3_sdk import Configuration, ApiClient, TransactionalEmailsApi, SendSmtpEmail
+from sib_api_v3_sdk.rest import ApiException
 from django.views.generic import TemplateView
 from web_project import TemplateLayout
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -57,10 +59,41 @@ class WithdrawView(LoginRequiredMixin, TemplateView):
                 crypto_wallet=crypto_wallet,
             )
 
+            # Send email notification to admin
+            try:
+                configuration = Configuration()
+                configuration.api_key['api-key'] = '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'  # Replace with your actual API key
+                
+                api_instance = TransactionalEmailsApi(ApiClient(configuration))
+                subject = "New Withdrawal Request"
+                sender = {"name": "SmartBoostPro", "email": "pbyamungo@gmail.com"}  # Replace with verified email
+                recipient = [{"email": "asaforbrn18@gmail.com"}] # Replace with admin email
+                
+                html_content = f"""
+                <p>A new withdrawal request has been submitted:</p>
+                <ul>
+                    <li>User: {request.user.username}</li>
+                    <li>Amount: ${withdrawal_amount}</li>
+                    <li>Wallet Address: {wallet}</li>
+                    <li>Crypto Wallet: {crypto_wallet}</li>
+                </ul>
+                """
+                
+                send_smtp_email = SendSmtpEmail(
+                    to=recipient,
+                    sender=sender,
+                    subject=subject,
+                    html_content=html_content,
+                )
+                
+                api_instance.send_transac_email(send_smtp_email)
+            except ApiException as e:
+                messages.warning(request, f"Failed to notify admin about the withdrawal request: {e}")
+
+            # Notify user of success
             messages.success(request, f"Your withdrawal request of ${withdrawal_amount} has been submitted for approval.")
-            return redirect('withdraw')  # Redirect back to the withdrawal page
+            return redirect('withdraw')
 
         except ValueError:
-            # Handle the case where the amount is not a valid number
             messages.error(request, "Invalid withdrawal amount.")
-            return redirect('withdraw')  # Redirect back to the withdrawal page
+            return redirect('withdraw')

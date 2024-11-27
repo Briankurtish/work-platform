@@ -61,13 +61,14 @@
         <p class="mb-2">Plan currently subscribed</p>
         {% if user_plan %}
           <h4 class="text-primary mb-0">{{ user_plan.name }}</h4>
+          <a href="{% url 'upgrade_plan' %}" class="mt-3 btn btn-primary">Upgrade Plan</a>
         {% else %}
           <h4 class="text-secondary mb-0">No Plan</h4>
         <br>
         <a href="{% url 'upgrade_plan' %}" class="btn btn-primary">Get Plan</a>
         {% endif %}
         
-        <a href="{% url 'upgrade_plan' %}" class="mt-3 btn btn-primary">Upgrade Plan</a>
+        
 
       </div>
       <img src="{% static 'img/illustrations/active.png' %}" class="position-absolute bottom-0 end-0 me-5 mb-5" width="83" alt="view sales">

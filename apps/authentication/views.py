@@ -1,3 +1,5 @@
+from sib_api_v3_sdk import Configuration, ApiClient, TransactionalEmailsApi, SendSmtpEmail
+from sib_api_v3_sdk.rest import ApiException
 from django.contrib import messages
 from django.shortcuts import redirect
 from django.views.generic import TemplateView
@@ -5,6 +7,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login,authenticate, logout
 from web_project.template_helpers.theme import TemplateHelper
 from .forms import CreateUserForm
+from django.conf import settings
 
 
 """
@@ -35,13 +38,18 @@ class AuthView(TemplateView):
         if request.method == "POST":
             form = CreateUserForm(request.POST)
             if form.is_valid():
-                form.save()
+                # Save the form data
+                user = form.save()
                 username = form.cleaned_data.get('username')
                 messages.success(request, f'Account created for {username} successfully. Continue to Log In')
+                
+                # Send email notifications
+                self.send_email_to_client(user)
+                self.send_email_to_admin(user)
+                
                 return redirect('auth-login-basic')
         else:
             form = CreateUserForm()
-        
 
         # If form is invalid, return the form with errors
         context = {
@@ -50,6 +58,66 @@ class AuthView(TemplateView):
         }
         return self.render_to_response(context)
 
+    def send_email_to_client(self, user):
+        """Send a confirmation email to the client."""
+        try:
+            # Set up Brevo API configuration
+            configuration = Configuration()
+            configuration.api_key['api-key'] = settings.BREVO_API_KEY  # Store your API key in settings.py
+            
+            api_instance = TransactionalEmailsApi(ApiClient(configuration))
+            subject = "Welcome to SmartBoostPro"
+            sender = {"name": "SmartBoostPro", "email": "pbyamungo@gmail.com"}  # Use your verified email
+            recipient = [{"email": user.email}]
+            
+            html_content = f"""
+            <p>Dear {user.username},</p>
+            <p>Welcome to SmartBoostPro! Your account has been successfully created.</p>
+            <p>We are excited to have you on board. If you have any questions or need support, feel free to reach out to us.</p>
+            <p>Thank you for joining!</p>
+            """
+            
+            send_smtp_email = SendSmtpEmail(
+                to=recipient,
+                sender=sender,
+                subject=subject,
+                html_content=html_content,
+            )
+            
+            api_instance.send_transac_email(send_smtp_email)
+        except ApiException as e:
+            messages.warning(self.request, f"Failed to send email to client: {e}")
+
+    def send_email_to_admin(self, user):
+        """Send a notification email to the admin about the new user."""
+        try:
+            # Set up Brevo API configuration
+            configuration = Configuration()
+            configuration.api_key['api-key'] = settings.BREVO_API_KEY  # Store your API key in settings.py
+            
+            api_instance = TransactionalEmailsApi(ApiClient(configuration))
+            subject = "New User Registration"
+            sender = {"name": "SmartBoostPro", "email": "pbyamungo@gmail.com"}  # Use your verified email
+            recipient = [{"email": "asaforbrn18@gmail.com"}]  # Use your admin's email
+            
+            html_content = f"""
+            <p>Dear Admin,</p>
+            <p>A new user has registered on SmartBoostPro.</p>
+            <p><strong>Username:</strong> {user.username}</p>
+            <p><strong>Email:</strong> {user.email}</p>
+            <p>Thank you for using SmartBoostPro!</p>
+            """
+            
+            send_smtp_email = SendSmtpEmail(
+                to=recipient,
+                sender=sender,
+                subject=subject,
+                html_content=html_content,
+            )
+            
+            api_instance.send_transac_email(send_smtp_email)
+        except ApiException as e:
+            messages.warning(self.request, f"Failed to send email to admin: {e}")
 
 
 class LoginView(TemplateView):

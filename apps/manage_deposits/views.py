@@ -1,3 +1,5 @@
+from sib_api_v3_sdk import Configuration, ApiClient, TransactionalEmailsApi, SendSmtpEmail
+from sib_api_v3_sdk.rest import ApiException
 from django.views.generic import TemplateView
 from web_project import TemplateLayout
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
@@ -5,7 +7,6 @@ from django.shortcuts import redirect, get_object_or_404
 from django.contrib import messages
 from apps.recharge_account.models import Deposit
 from django.db.models import Sum
-
 
 class ManageDepositsView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     template_name = "manage_deposits.html"
@@ -53,6 +54,10 @@ class ManageDepositsView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
                     deposit.save()
                     profile.save()
                     messages.success(request, "Deposit approved successfully.")
+
+                    # Send email notification to the user about the approval
+                    self.notify_user(deposit, "approved")
+
             elif action == 'reject':
                 if deposit.status != 'Pending':
                     messages.warning(request, "This deposit has already been processed.")
@@ -60,9 +65,47 @@ class ManageDepositsView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
                     deposit.status = 'Rejected'
                     deposit.save()
                     messages.success(request, "Deposit rejected successfully.")
+
+                    # Send email notification to the user about the rejection
+                    self.notify_user(deposit, "rejected")
+
             else:
                 messages.error(request, "Invalid action.")
         except Exception as e:
             messages.error(request, f"An error occurred: {str(e)}")
 
         return redirect('manage-deposits')
+
+    def notify_user(self, deposit, status):
+        """Send notification email to the user about the deposit status."""
+        try:
+            configuration = Configuration()
+            configuration.api_key['api-key'] = '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'  # Replace with your actual API key
+            
+            api_instance = TransactionalEmailsApi(ApiClient(configuration))
+            subject = "Your Deposit Request Update"
+            sender = {"name": "SmartBoostPro", "email": "pbyamungo@gmail.com"}  # Replace with your verified email
+            recipient = [{"email": deposit.user.email}]  # Dynamically get user's email
+            
+            if status == "approved":
+                html_content = f"""
+                <p>Dear {deposit.user.username},</p>
+                <p>Your deposit request of <strong>${deposit.amount}</strong> has been approved.</p>
+                <p>Your updated balance is <strong>${deposit.user.profile.balance}</strong>.</p>
+                """
+            elif status == "rejected":
+                html_content = f"""
+                <p>Dear {deposit.user.username},</p>
+                <p>Unfortunately, your deposit request of <strong>${deposit.amount}</strong> has been rejected.</p>
+                """
+            
+            send_smtp_email = SendSmtpEmail(
+                to=recipient,
+                sender=sender,
+                subject=subject,
+                html_content=html_content,
+            )
+            
+            api_instance.send_transac_email(send_smtp_email)
+        except ApiException as e:
+            messages.warning(self.request, f"Failed to notify the user: {e}")

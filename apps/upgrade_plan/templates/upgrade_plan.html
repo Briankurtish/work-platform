@@ -47,11 +47,19 @@
           <p class="card-text"><strong>Price:</strong> ${{ plan.price }}</p>
           <p class="card-text"><strong>Profit:</strong> ${{ plan.profit }}</p>
           <p class="card-text"><strong>Clicks:</strong> {{ plan.number_of_clicks }} Clicks</p>
-          <form method="post" action="">
-            {% csrf_token %}
-            <input type="hidden" name="plan_id" value="{{ plan.id }}">
-            <button type="submit" class="btn btn-primary">Select Plan</button>
-          </form>
+          
+          {% if user.profile.plan == plan %}
+            <!-- If the user has selected this plan, display it as the current active plan -->
+            <p class="text-success"><strong>Currently Active Plan</strong></p>
+          {% else %}
+            <!-- Otherwise, show the "Select Plan" button -->
+            <form method="post" action="">
+              {% csrf_token %}
+              <input type="hidden" name="plan_id" value="{{ plan.id }}">
+              <button type="submit" class="btn btn-primary">Select Plan</button>
+            </form>
+          {% endif %}
+          
         </div>
       </div>
     </div>

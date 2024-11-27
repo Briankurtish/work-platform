@@ -1,9 +1,13 @@
+import sib_api_v3_sdk
+from sib_api_v3_sdk.rest import ApiException
 from django.shortcuts import render, redirect
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import TemplateView
 from web_project import TemplateLayout
 from django.contrib import messages
 from .models import Deposit
+from django.core.mail import send_mail
+from django.conf import settings 
 
 
 class RechargeAccountView(LoginRequiredMixin, TemplateView):
@@ -33,6 +37,42 @@ class RechargeAccountView(LoginRequiredMixin, TemplateView):
             proof_of_payment=proof_of_payment,
         )
 
-        # Show success message and redirect
-        messages.success(request, "Your recharge request has been submitted successfully.", extra_tags='recharge_account')
+        
+    # Send email to admin
+        try:
+            configuration = sib_api_v3_sdk.Configuration()
+            configuration.api_key['api-key'] = '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'  # Replace with your actual API key
+            
+            api_instance = sib_api_v3_sdk.TransactionalEmailsApi(sib_api_v3_sdk.ApiClient(configuration))
+            
+            subject = "New Deposit Request"
+            sender = {"name": "SmartBoostPro", "email": "pbyamungo@gmail.com"}  # Replace with your verified email
+            recipient = [{"email": "asaforbrn18@gmail.com"}]  # Admin email
+            
+            html_content = f"""
+            <p>A new deposit request has been submitted:</p>
+            <ul>
+                <li>User: {user.username}</li>
+                <li>Amount: ${amount}</li>
+                <li>Crypto Wallet: {crypto_wallet}</li>
+            </ul>
+            """
+            
+            send_smtp_email = sib_api_v3_sdk.SendSmtpEmail(
+                to=recipient,
+                sender=sender,
+                subject=subject,
+                html_content=html_content,
+            )
+            
+            api_instance.send_transac_email(send_smtp_email)
+            messages.success(request, "Your recharge request has been submitted successfully.", extra_tags='recharge_account')
+        
+        except ApiException as e:
+            messages.error(request, f"Failed to notify the admin: {e}")
+
+        # Redirect back to the recharge account page
         return redirect('recharge_account')
+
+
+# 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
