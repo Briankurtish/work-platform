@@ -1,0 +1,69 @@
+{% extends layout_path %}
+
+{% load static %}
+{% load i18n %}
+
+{% block title %}Task Panel{% endblock title %}
+
+{% block vendor_css %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'vendor/libs/apex-charts/apex-charts.css' %}" />
+{% endblock vendor_css %}
+
+{% block vendor_js %}
+{{ block.super }}
+<script src="{% static 'vendor/libs/apex-charts/apexcharts.js' %}"></script>
+{% endblock vendor_js %}
+
+{% block page_js %}
+{{ block.super }}
+<script src="{% static 'js/dashboards-analytics.js' %}"></script>
+{% endblock page_js %}
+
+{% block content %}
+<div id="content-wrapper" class="d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+  <!-- Spinner initially displayed -->
+  <div id="spinner" class="text-center">
+    <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <h5 class="card-title">Loading Products</h5>
+    <p class="card-text">Please wait while we fetch the latest products for you.</p>
+  </div>
+</div>
+<!-- Hidden product card content -->
+<div id="card-content" class="d-none">
+    {% if random_product %}
+      <div class="col-md-6 col-lg-4 mx-auto">
+        <div class="card h-100">
+          <div class="card-body">
+            <h5 class="card-title mb-0"><strong>{{ random_product.name }}</strong></h5>
+            <hr>
+            <h6 class="card-subtitle mb-2 text-info"><strong>Price: </strong>${{ random_product.price }}</h6>
+            <img class="img-fluid d-flex mx-auto my-4 rounded" src="{{ random_product.image.url }}" alt="{{ random_product.name }}" />
+            <p class="card-text"><strong>Description : </strong> {{ random_product.description }}</p>
+            <p class="card-text"><strong>Commission : ${{ random_product.profit }}</strong> </p>
+            <a href="javascript:void(0);" class="card-link btn btn-success">Checkout Item</a>
+            <a href="javascript:void(0);" class="card-link btn btn-secondary">Cancel</a>
+          </div>
+        </div>
+      </div>
+    {% else %}
+      <p>No products available.</p>
+    {% endif %}
+  </div>
+
+<script>
+  // JavaScript to replace the spinner with the card after 5 seconds
+  setTimeout(() => {
+    // Hide the spinner
+    document.getElementById("spinner").classList.add("d-none");
+    // Show the card content
+    document.getElementById("card-content").classList.remove("d-none");
+    // Append the card content to the wrapper
+    const wrapper = document.getElementById("content-wrapper");
+    wrapper.innerHTML = '';
+    wrapper.appendChild(document.getElementById("card-content").firstElementChild);
+  }, 5000);
+</script>
+{% endblock %}
