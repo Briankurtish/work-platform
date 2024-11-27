@@ -8,6 +8,19 @@
 {% block vendor_css %}
 {{ block.super }}
 <link rel="stylesheet" href="{% static 'vendor/libs/apex-charts/apex-charts.css' %}" />
+<style>
+  /* Custom CSS for positioning the toast at the bottom right */
+  .toast-container {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    z-index: 1050;  /* Ensure it's above other elements */
+  }
+
+  .toast {
+    margin-bottom: 10px;  /* Space between toasts if multiple appear */
+  }
+</style>
 {% endblock vendor_css %}
 
 {% block vendor_js %}
@@ -36,7 +49,7 @@
           <th>Last Name</th>
           <th>Email</th>
           <th>Balance</th>
-          <th>Status</th>
+          <th>Active Status</th>
           <th>Actions</th>
         </tr>
       </thead>
@@ -55,13 +68,29 @@
           <td>
             ${{ client.profile.balance }} 
           </td>
-          <td><span class="badge rounded-pill bg-label-primary me-1">Active</span></td>
+          <td>
+            {% if client.is_active %}
+              <span class="badge rounded-pill bg-label-primary me-1">Active</span>
+            {% else %}
+              <span class="badge rounded-pill bg-label-secondary me-1">Inactive</span>
+            {% endif %}
+          </td>
           <td>
             <div class="dropdown">
               <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown"><i class="ri-more-2-line"></i></button>
               <div class="dropdown-menu">
-                <a class="dropdown-item" href="javascript:void(0);"><i class="ri-pencil-line me-1"></i> Edit</a>
-                <a class="dropdown-item" href="javascript:void(0);"><i class="ri-delete-bin-6-line me-1"></i> Delete</a>
+                {% if client.is_active %}
+          <a class="dropdown-item" href="{% url 'deactivate-user' client.id %}">
+            <i class="ri-pencil-line me-1"></i> Deactivate
+          </a>
+        {% else %}
+          <a class="dropdown-item" href="{% url 'activate-user' client.id %}">
+            <i class="ri-check-line me-1"></i> Activate
+          </a>
+        {% endif %}
+        <a class="dropdown-item" href="{% url 'delete-user' client.id %}">
+          <i class="ri-delete-bin-6-line me-1"></i> Delete
+        </a>
               </div>
             </div>
           </td>
@@ -74,6 +103,24 @@
   </div>
 </div>
 <!--/ Hoverable Table rows -->
+
+{% if messages %}
+  <!-- Toast container to hold all toasts -->
+  <div class="toast-container">
+    <div class="bs-toast toast fade show" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="toast-header">
+        <i class="ri-checkbox-circle-fill text-success me-2"></i>
+        <div class="me-auto fw-medium">Success</div>
+        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+      <div class="toast-body">
+        {% for message in messages %}
+          <p>{{ message }}</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
 
 </div>
 {% endblock %}

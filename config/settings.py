@@ -111,6 +111,7 @@ TEMPLATES = [
                 "django.contrib.messages.context_processors.messages",
                 "config.context_processors.my_setting",
                 "config.context_processors.environment",
+                'web_project.context_processors.pending_counts',  # Add your updated processor
             ],
             "libraries": {
                 "theme": "web_project.template_tags.theme",
@@ -122,6 +123,13 @@ TEMPLATES = [
         },
     },
 ]
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',  # In-memory cache
+        'LOCATION': 'unique-snowflake',  # A unique identifier
+    }
+}
 
 WSGI_APPLICATION = "config.wsgi.application"
 

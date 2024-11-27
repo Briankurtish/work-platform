@@ -1,10 +1,10 @@
 from django.urls import path
-from .views import AdminDashboardView
+from .views import admin_dashboard_view
 
 urlpatterns = [
     path(
         "index-admin/",
-        AdminDashboardView.as_view(),  # Correct use of as_view()
+        admin_dashboard_view,  # Correct use of as_view()
         name="index-admin",
     )
 ]

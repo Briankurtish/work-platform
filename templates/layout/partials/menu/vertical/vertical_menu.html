@@ -36,17 +36,15 @@
     </li>
 
 
-    {% comment %} <li class="menu-item {% if 'user-list' == request.resolver_match.url_name or '/dashbord/' in request.path %}active open{% endif %}">
-      <a href="{% url 'index' %}" class="menu-link ">
-        <i class="menu-icon tf-icons ri-bell-line"></i>
-        <div class="text-truncate" data-i18n="Dashboards">Deposit Requests</div>
-      </a>
-    </li> {% endcomment %}
-
     <li class="menu-item {% if  '/manage-deposits/' in request.path %}active open{% endif %}">
       <a href="{% url 'manage-deposits' %}" class="menu-link ">
         <i class="menu-icon tf-icons ri-dashboard-line"></i>
         <div class="text-truncate" data-i18n="Dashboards">Manage Deposits</div>
+        {% if pending_deposits_count > 0 %}
+      <span class="badge bg-label-info fs-tiny rounded-pill ms-auto">
+        {{ pending_deposits_count }}
+      </span>
+    {% endif %}
       </a>
     </li>
 
@@ -54,6 +52,12 @@
       <a href="{% url 'manage-withdrawals' %}" class="menu-link ">
         <i class="menu-icon tf-icons ri-dashboard-line"></i>
         <div class="text-truncate" data-i18n="Dashboards">Manage Withdrawals</div>
+        {% if pending_withdrawals_count > 0 %}
+      <span class="badge bg-label-danger fs-tiny rounded-pill ms-auto">
+        {{ pending_withdrawals_count }}
+      </span>
+    {% endif %}
+
       </a>
     </li>
 
