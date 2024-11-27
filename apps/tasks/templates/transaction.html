@@ -43,15 +43,29 @@
             <img class="img-fluid d-flex mx-auto my-4 rounded" src="{{ random_product.image.url }}" alt="{{ random_product.name }}" />
             <p class="card-text"><strong>Description : </strong> {{ random_product.description }}</p>
             <p class="card-text"><strong>Commission : ${{ random_product.profit }}</strong> </p>
-            <a href="javascript:void(0);" class="card-link btn btn-success">Checkout Item</a>
-            <a href="javascript:void(0);" class="card-link btn btn-secondary">Cancel</a>
+            <div class="row">
+                <div class="col-12 col-md-6 mb-3 mb-md-0">
+                  <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="product_id" value="{{ random_product.id }}">
+                    <button type="submit" class="btn btn-success w-100">Checkout Item</button>
+                  </form>
+                </div>
+                <div class="col-12 col-md-6">
+                  <a href="{% url 'task-panel' %}" class="card-link btn btn-secondary w-100">Cancel</a>
+                </div>
+              </div>
+              
+              
           </div>
         </div>
       </div>
     {% else %}
       <p>No products available.</p>
+      <!-- Refresh button when no products are available -->
+      <button id="refresh-button" class="btn btn-primary mt-3" onclick="location.reload();">Refresh and Try Again</button>
     {% endif %}
-  </div>
+</div>
 
 <script>
   // JavaScript to replace the spinner with the card after 5 seconds
