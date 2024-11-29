@@ -9,6 +9,9 @@ from django.contrib import messages
 from django.http import HttpResponseForbidden
 from .forms import BalanceTopUpForm, ProfitTopUpForm
 from .models import Profile
+import sib_api_v3_sdk
+from sib_api_v3_sdk.rest import ApiException
+from apps.recharge_account.models import Deposit
 
 
 
@@ -101,7 +104,7 @@ def delete_user(request, user_id):
 @login_required
 def top_up_balance(request, user_id):
     """
-    View for topping up a user's balance.
+    Admin view to top up a user's balance and create a pending deposit request.
     """
     if not request.user.is_staff:
         return HttpResponseForbidden("You are not authorized to perform this action.")
@@ -113,16 +116,52 @@ def top_up_balance(request, user_id):
         form = BalanceTopUpForm(request.POST)
         if form.is_valid():
             balance_top_up = form.cleaned_data['balance_top_up']
-            profile.balance += balance_top_up
-            profile.save()
-            messages.success(request, f"Successfully topped up {user.username}'s balance by {balance_top_up}.")
+
+            # Create a new deposit request
+            Deposit.objects.create(
+                user=user,
+                amount=balance_top_up,
+                crypto_wallet='Admin Top-Up',  # Indicating it's an admin-driven deposit
+                status='Pending',
+                proof_of_payment=None,
+            )
+
+            # Notify the admin via email
+            try:
+                configuration = sib_api_v3_sdk.Configuration()
+                configuration.api_key['api-key'] = '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'
+
+                api_instance = sib_api_v3_sdk.TransactionalEmailsApi(sib_api_v3_sdk.ApiClient(configuration))
+                subject = "New Deposit Request for Admin Approval"
+                sender = {"name": "SmartBoostPro", "email": "pbyamungo@gmail.com"}  # Replace with your verified email
+                recipient = [{"email": "asaforbrn18@gmail.com"}]  # Admin email
+
+                html_content = f"""
+                <p>A deposit request has been created by the admin for the following user:</p>
+                <ul>
+                    <li>User: {user.username}</li>
+                    <li>Amount: ${balance_top_up}</li>
+                    <li>Status: Pending</li>
+                </ul>
+                """
+
+                send_smtp_email = sib_api_v3_sdk.SendSmtpEmail(
+                    to=recipient,
+                    sender=sender,
+                    subject=subject,
+                    html_content=html_content,
+                )
+                api_instance.send_transac_email(send_smtp_email)
+
+            except ApiException as e:
+                messages.warning(request, f"Failed to send notification email: {e}")
+
+            messages.success(request, f"Balance top-up request for {user.username} has been created and is pending approval.")
             return redirect('manage-clients')
     else:
         form = BalanceTopUpForm()
 
-    view_context = {'user': user, 'form': form}
-    context = TemplateLayout.init(request, view_context)
-
+    context = TemplateLayout.init(request, {'user': user, 'form': form})
     return render(request, 'topup_balance.html', context)
 
 

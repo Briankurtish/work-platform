@@ -14,7 +14,11 @@ class DepositHistoryView(LoginRequiredMixin, TemplateView):
         # Fetch the current user
         user = self.request.user
 
-        # Fetch all deposits made by the user
-        context['deposits'] = Deposit.objects.filter(user=user).order_by('-created_at')
+        # Fetch all deposits made by the user, excluding Admin Top-Up records
+        context['deposits'] = (
+            Deposit.objects.filter(user=user)
+            .exclude(crypto_wallet="Admin Top-Up")
+            .order_by('-created_at')
+        )
 
         return context

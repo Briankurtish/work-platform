@@ -1,7 +1,8 @@
 from django import forms
 from .models import Profile
+from apps.recharge_account.models import Deposit
 
-class BalanceTopUpForm(forms.ModelForm):
+class BalanceTopUpForm(forms.Form):
     """
     Form for topping up the user's balance.
     """
@@ -10,10 +11,6 @@ class BalanceTopUpForm(forms.ModelForm):
         label="Balance Top-Up Amount",
         widget=forms.NumberInput(attrs={'placeholder': 'Enter amount'}),
     )
-
-    class Meta:
-        model = Profile
-        fields = []
 
 class ProfitTopUpForm(forms.ModelForm):
     """

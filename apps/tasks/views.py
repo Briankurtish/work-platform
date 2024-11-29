@@ -100,7 +100,7 @@ class TasksView(LoginRequiredMixin, TemplateView):
         user_balance = Deposit.objects.filter(user=request.user, status='Approved').aggregate(total=Sum('amount'))['total'] or 0
         
         if user_balance < product.price:
-            messages.error(request, "Insufficient balance to purchase this product.")
+            messages.error(request, "Insufficient balance to boost this product.")
             return redirect('task-panel')
         
         # Proceed with the checkout
@@ -111,7 +111,7 @@ class TasksView(LoginRequiredMixin, TemplateView):
         
         # Optionally, you can track the checkout transaction or update deposit data, if needed
         
-        messages.success(request, f"Successfully checked out the product: {product.name}. Profit added!")
+        messages.success(request, f"Successfully Boosted the product: {product.name}. Commission added!")
         
         # Redirect the user to some success or task panel page
         return redirect('task-panel')
