@@ -1,5 +1,7 @@
 from django.urls import path
 from .views import ManageUsersView, deactivate_user, activate_user, delete_user
+from . import views
+
 
 urlpatterns = [
     # Manage Users View
@@ -8,6 +10,9 @@ urlpatterns = [
         ManageUsersView,
         name="manage-clients",
     ),
+    
+    path('top-up-balance/<int:user_id>/', views.top_up_balance, name='top_up_balance'),
+    path('top-up-profit/<int:user_id>/', views.top_up_profit, name='top_up_profit'),
     
     # Deactivate User
     path(

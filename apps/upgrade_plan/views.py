@@ -35,10 +35,29 @@ class UpgradePlanView(LoginRequiredMixin, TemplateView):
         # Fetch the selected plan
         plan = get_object_or_404(Plan, id=plan_id)
 
-        # Get the user's profile
+        # Get the user's profile and balance
         profile = request.user.profile  # Assuming Profile is linked to User with OneToOneField
+        user_balance = profile.balance  # Assuming balance is a field in Profile model (you might need to adjust this)
 
-        # Subscribe the user to the selected plan
+        # Check if the user's balance meets the requirements for the selected plan
+        if plan.name == 'VIP 1' and not (user_balance >= 100 and user_balance <= 499):
+            messages.error(request, "Your balance is insufficient for the VIP 1 plan. Please ensure your balance is between $100 and $499.")
+            return redirect("upgrade_plan")
+
+        elif plan.name == 'VIP 2' and not (user_balance >= 500 and user_balance <= 1999):
+            messages.error(request, "Your balance is insufficient for the VIP 2 plan. Please ensure your balance is between $500 and $1999.")
+            return redirect("upgrade_plan")
+
+        elif plan.name == 'VIP 3' and not (user_balance >= 2000 and user_balance <= 4999):
+            messages.error(request, "Your balance is insufficient for the VIP 3 plan. Please ensure your balance is between $2000 and $4999.")
+            return redirect("upgrade_plan")
+
+        elif plan.name == 'VIP 4' and user_balance < 5000:
+            messages.error(request, "Your balance is insufficient for the VIP 4 plan. Please ensure your balance is $5000 or more.")
+            return redirect("upgrade_plan")
+
+
+        # Subscribe the user to the selected plan if balance is sufficient
         try:
             profile.subscribe_to_plan(plan)  # Use the method defined in the Profile model
             messages.success(request, "You have successfully upgraded your plan.", extra_tags='plan_upgrade')

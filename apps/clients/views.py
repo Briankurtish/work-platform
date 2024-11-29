@@ -7,6 +7,8 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect
 from django.contrib import messages
 from django.http import HttpResponseForbidden
+from .forms import BalanceTopUpForm, ProfitTopUpForm
+from .models import Profile
 
 
 
@@ -94,3 +96,59 @@ def delete_user(request, user_id):
     context = TemplateLayout.init(request, view_context)
     
     return render(request, 'delete_user.html', context)
+
+
+@login_required
+def top_up_balance(request, user_id):
+    """
+    View for topping up a user's balance.
+    """
+    if not request.user.is_staff:
+        return HttpResponseForbidden("You are not authorized to perform this action.")
+
+    user = get_object_or_404(User, id=user_id)
+    profile = get_object_or_404(Profile, client=user)
+
+    if request.method == 'POST':
+        form = BalanceTopUpForm(request.POST)
+        if form.is_valid():
+            balance_top_up = form.cleaned_data['balance_top_up']
+            profile.balance += balance_top_up
+            profile.save()
+            messages.success(request, f"Successfully topped up {user.username}'s balance by {balance_top_up}.")
+            return redirect('manage-clients')
+    else:
+        form = BalanceTopUpForm()
+
+    view_context = {'user': user, 'form': form}
+    context = TemplateLayout.init(request, view_context)
+
+    return render(request, 'topup_balance.html', context)
+
+
+@login_required
+def top_up_profit(request, user_id):
+    """
+    View for topping up a user's profit.
+    """
+    if not request.user.is_staff:
+        return HttpResponseForbidden("You are not authorized to perform this action.")
+
+    user = get_object_or_404(User, id=user_id)
+    profile = get_object_or_404(Profile, client=user)
+
+    if request.method == 'POST':
+        form = ProfitTopUpForm(request.POST)
+        if form.is_valid():
+            profit_top_up = form.cleaned_data['profit_top_up']
+            profile.profit += profit_top_up
+            profile.save()
+            messages.success(request, f"Successfully topped up {user.username}'s profit by {profit_top_up}.")
+            return redirect('manage-clients')
+    else:
+        form = ProfitTopUpForm()
+
+    view_context = {'user': user, 'form': form}
+    context = TemplateLayout.init(request, view_context)
+
+    return render(request, 'topup_profit.html', context)

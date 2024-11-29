@@ -45,7 +45,7 @@
           <h5 class="card-title">{{ plan.name }}</h5>
           <p class="card-text">{{ plan.description|default:"No description available." }}</p>
           <p class="card-text"><strong>Price:</strong> ${{ plan.price }}</p>
-          <p class="card-text"><strong>Profit:</strong> ${{ plan.profit }}</p>
+          <p class="card-text"><strong>Profit:</strong> {{ plan.profit }}%</p>
           <p class="card-text"><strong>Clicks:</strong> {{ plan.number_of_clicks }} Clicks</p>
           
           {% if user.profile.plan == plan %}

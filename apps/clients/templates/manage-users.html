@@ -88,6 +88,13 @@
             <i class="ri-check-line me-1"></i> Activate
           </a>
         {% endif %}
+        <a class="dropdown-item" href="{% url 'top_up_balance' client.id %}">
+          <i class="ri-money-dollar-box-fill me-1"></i> TopUp Balance
+      </a>
+      
+        <a class="dropdown-item" href="{% url 'top_up_profit' client.id %}">
+          <i class="ri-money-dollar-box-fill me-1"></i> TopUp Profit
+        </a>
         <a class="dropdown-item" href="{% url 'delete-user' client.id %}">
           <i class="ri-delete-bin-6-line me-1"></i> Delete
         </a>
