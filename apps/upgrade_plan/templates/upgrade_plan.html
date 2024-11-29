@@ -42,7 +42,7 @@
     <div class="col-md-6 col-lg-4">
       <div class="card">
         <div class="card-body">
-          <h5 class="card-title">{{ plan.name }}</h5>
+          <h5 class="card-title"><strong>{{ plan.name }}</strong></h5>
           <p class="card-text">{{ plan.description|default:"No description available." }}</p>
           <p class="card-text"><strong>Price:</strong> ${{ plan.price }}</p>
           <p class="card-text"><strong>Profit:</strong> {{ plan.profit }}%</p>
@@ -50,7 +50,7 @@
           
           {% if user.profile.plan == plan %}
             <!-- If the user has selected this plan, display it as the current active plan -->
-            <p class="text-success"><strong>Currently Active Plan</strong></p>
+            <h6 class="text-success"><strong>Currently Active Plan</strong></h6>
           {% else %}
             <!-- Otherwise, show the "Select Plan" button -->
             <form method="post" action="">
@@ -69,19 +69,35 @@
   {% if messages %}
   <!-- Toast container to hold all toasts -->
   <div class="toast-container">
-    <div class="bs-toast toast fade show" role="alert" aria-live="assertive" aria-atomic="true">
-      <div class="toast-header">
-        <i class="ri-checkbox-circle-fill text-success me-2"></i>
-        <div class="me-auto fw-medium">Success</div>
-        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-      </div>
-      <div class="toast-body">
-        {% for message in messages %}
+    {% for message in messages %}
+      {% if message.tags == "error" %}
+      <!-- Toast for error messages -->
+      <div class="bs-toast toast fade show bg-danger text-white" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header bg-danger text-white">
+          <i class="ri-error-warning-fill text-white me-2"></i>
+          <div class="me-auto fw-medium">Error</div>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
           <p>{{ message }}</p>
-        {% endfor %}
+        </div>
       </div>
-    </div>
+      {% else %}
+      <!-- Toast for success messages -->
+      <div class="bs-toast toast fade show bg-success text-white" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header bg-success text-white">
+          <i class="ri-checkbox-circle-fill text-white me-2"></i>
+          <div class="me-auto fw-medium">Success</div>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+          <p>{{ message }}</p>
+        </div>
+      </div>
+      {% endif %}
+    {% endfor %}
   </div>
   {% endif %}
+  
 </div>
 {% endblock content %}
