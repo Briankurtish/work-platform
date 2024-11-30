@@ -35,85 +35,77 @@
 
 {% block content %}
 <div class="row gy-6">
-  {% comment %} <h3 class=" mb-0 flex-wrap text-nowrap">Recharge Acocunt</h3> {% endcomment %}
-
   <div class="row">
     <div class="col-xl">
       <div class="card mb-6">
         <div class="card-header d-flex justify-content-between align-items-center">
-          <h5 class="mb-0">Recharge Account</h5> 
+          <h5 class="mb-0">Recharge Account</h5>
         </div>
         <div class="card-body">
           <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
+            
+            <!-- Crypto Wallet Selection (Dynamic) -->
             <div class="form-floating form-floating-outline mb-6">
               <select class="form-select" id="crypto_wallet" name="crypto_wallet" required>
-                  <option value="" selected>Select crypto wallet</option>
-                  <option value="Bitcoin - BTC">Bitcoin - BTC</option>
-                  <option value="USDT - TRC20">USDT - TRC20</option>
-                  <option value="Etherium - ERC-20">Etherium - ERC-20</option>
+                <option value="" selected>Select crypto wallet</option>
+                {% for wallet in wallets %}
+                  <option value="{{ wallet.name }}">{{ wallet.name }} - {{ wallet.network }}</option>
+                {% endfor %}
               </select>
               <label for="crypto_wallet">Crypto Wallet</label>
-          </div>
+            </div>
 
+            <!-- Display selected wallet addresses (Dynamic) -->
             <div class="row mt-3 mb-3">
               <hr>
-              <div class="col-md-4">
-                <div>
-                  <p class='text-warning'>Btc Wallet - BTC Network</p>
-                  <p>Bgsdkgigiugsd6786tb</p>
+              {% for wallet in wallets %}
+                <div class="col-md-4">
+                  <div>
+                    <p class="text-info">{{ wallet.name }} - {{ wallet.network }} Network</p>
+                    <p>{{ wallet.address }}</p>
+                  </div>
                 </div>
-              </div>
-              
-              <div class="col-md-4">
-                <div>
-                  <p class='text-success'>USDT Wallet - TRC20 Network</p>
-                  <p>Trsdkgigiugsd6786tb</p>
-                </div>
-              </div>
-
-              <div class="col-md-4">
-                <div>
-                  <p class='text-primary'>ETH Wallet - ERC20 Network</p>
-                  <p>0x6Esdkgigiugsd6786tb</p>
-                </div>
-              </div>
+              {% endfor %}
               <hr>
             </div>
-            
+
+            <!-- Amount input -->
             <div class="form-floating form-floating-outline mb-6">
               <input type="number" class="form-control" id="amount" name="amount" placeholder="Enter amount" required />
               <label for="amount">Amount</label>
-          </div>
+            </div>
 
+            <!-- Proof of payment -->
             <div class="mb-4">
               <label for="proof_of_payment" class="form-label">Proof of Payment</label>
               <input class="form-control" type="file" id="proof_of_payment" name="proof_of_payment" required>
-          </div>
-           
+            </div>
+
+            <!-- Submit Button -->
             <button type="submit" class="btn btn-primary">Recharge Account</button>
           </form>
         </div>
       </div>
-  </div>
+    </div>
 
-  {% if messages %}
-  <!-- Toast container to hold all toasts -->
-  <div class="toast-container">
-    <div class="bs-toast toast fade show" role="alert" aria-live="assertive" aria-atomic="true">
-      <div class="toast-header">
-        <i class="ri-checkbox-circle-fill text-success me-2"></i>
-        <div class="me-auto fw-medium">Success</div>
-        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-      </div>
-      <div class="toast-body">
-        {% for message in messages %}
-          <p>{{ message }}</p>
-        {% endfor %}
+    <!-- Toast Notifications -->
+    {% if messages %}
+    <div class="toast-container">
+      <div class="bs-toast toast fade show" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+          <i class="ri-checkbox-circle-fill text-success me-2"></i>
+          <div class="me-auto fw-medium">Success</div>
+          <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+          {% for message in messages %}
+            <p>{{ message }}</p>
+          {% endfor %}
+        </div>
       </div>
     </div>
+    {% endif %}
   </div>
-  {% endif %}
-
 </div>
 {% endblock %}

@@ -6,6 +6,7 @@ from django.views.generic import TemplateView
 from web_project import TemplateLayout
 from django.contrib import messages
 from .models import Deposit
+from apps.wallets.models import CryptoWallet
 from django.core.mail import send_mail
 from django.conf import settings 
 
@@ -14,7 +15,10 @@ class RechargeAccountView(LoginRequiredMixin, TemplateView):
     template_name = "recharge_account.html"
 
     def get_context_data(self, **kwargs):
+        # Fetch crypto wallets from the database
+        wallets = CryptoWallet.objects.all()
         context = TemplateLayout.init(self, super().get_context_data(**kwargs))
+        context['wallets'] = wallets  # Add wallets to context
         return context
 
     def post(self, request, *args, **kwargs):

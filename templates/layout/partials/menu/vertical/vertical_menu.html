@@ -75,6 +75,13 @@
       </a>
     </li>
 
+    <li class="menu-item {% if  '/manage-wallets/' in request.path %}active open{% endif %}">
+      <a href="{% url 'manage-wallets' %}" class="menu-link ">
+        <i class="menu-icon tf-icons ri-dashboard-line"></i>
+        <div class="text-truncate" data-i18n="Dashboards">Manage Wallets</div>
+      </a>
+    </li>
+
     {% else %}
 
     <li class="menu-item {% if 'index' == request.resolver_match.url_name or '/dashbord/' in request.path %}active open{% endif %}">
@@ -129,7 +136,7 @@
     
 
     
-    <!-- Layouts -->
+    {% comment %} <!-- Layouts -->
     <li class="menu-item {% if '/layouts/' in request.path  %}active open{% endif %}">
       <a href="javascript:void(0);" class="menu-link menu-toggle">
         <i class="menu-icon tf-icons ri-layout-2-line"></i>
@@ -279,16 +286,16 @@
           <a href="{% url 'auth-register-basic' %}" class="menu-link" >
             <div class="text-truncate" data-i18n="Register">Register</div>
           </a>
-        </li>
-        <li class="menu-item {% if '/forgot_password/' in request.path %}active{% endif %}">
+        </li> {% endcomment %}
+        {% comment %} <li class="menu-item {% if '/forgot_password/' in request.path %}active{% endif %}">
           <a href="{% url 'auth-forgot-password-basic' %}" class="menu-link" >
             <div class="text-truncate" data-i18n="Frogot Password">Frogot Password</div>
           </a>
-        </li>
+        </li> {% endcomment %}
       </ul>
     </li>
     <!-- Misc -->
-    <li class="menu-item {% if '/misc/' in request.path %}active open{% endif %}">
+    {% comment %} <li class="menu-item {% if '/misc/' in request.path %}active open{% endif %}">
       <a href="javascript:void(0);" class="menu-link menu-toggle">
         <i class="menu-icon tf-icons ri-box-3-line"></i>
         <div class="text-truncate" data-i18n="Misc">Misc</div>
@@ -305,9 +312,9 @@
           </a>
         </li>
       </ul>
-    </li>
+    </li> {% endcomment %}
 
-    <li class="menu-header fw-medium mt-7">
+    {% comment %} <li class="menu-header fw-medium mt-7">
       <span class="menu-header-text">Components</span>
     </li>
 
@@ -512,9 +519,9 @@
         <div class="text-truncate" data-i18n="Datatables">Datatables</div>
         <span class="badge bg-label-primary fs-tiny rounded-pill ms-auto">Pro</span>
       </a>
-    </li>
+    </li> {% endcomment %}
 
-    <li class="menu-header fw-medium mt-7">
+    {% comment %} <li class="menu-header fw-medium mt-7">
       <span class="menu-header-text">Misc</span>
     </li>
 
@@ -523,13 +530,13 @@
         <i class="menu-icon tf-icons ri-lifebuoy-line"></i>
         <div class="text-truncate" data-i18n="Support">Support</div>
       </a>
-    </li>
-    <li class="menu-item">
+    </li> {% endcomment %}
+    {% comment %} <li class="menu-item">
       <a href="https://demos.themeselection.com/materio-bootstrap-html-admin-template/documentation/django-introduction.html" class="menu-link" target="_blank">
         <i class="menu-icon tf-icons ri-article-line"></i>
         <div class="text-truncate" data-i18n="Documentation">Documentation</div>
       </a>
-    </li>
+    </li> {% endcomment %}
 
     {% endif %}
 

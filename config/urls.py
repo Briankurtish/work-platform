@@ -57,6 +57,9 @@ urlpatterns = [
     # Manage Products urls
     path("", include("apps.manage_products.urls")),
     
+    # Manage Wallets urls
+    path("", include("apps.wallets.urls")),
+    
     # Recharge accounts urls
     path("", include("apps.recharge_account.urls")),
     
@@ -101,6 +104,8 @@ urlpatterns = [
 
     # Tables urls
     path("", include("apps.tables.urls")),
+    
+
     
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

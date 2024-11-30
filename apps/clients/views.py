@@ -12,6 +12,7 @@ from .models import Profile
 import sib_api_v3_sdk
 from sib_api_v3_sdk.rest import ApiException
 from apps.recharge_account.models import Deposit
+from apps.manage_products.models import Product
 
 
 
@@ -163,6 +164,58 @@ def top_up_balance(request, user_id):
 
     context = TemplateLayout.init(request, {'user': user, 'form': form})
     return render(request, 'topup_balance.html', context)
+
+
+@login_required
+def toggle_super_bonus_mode(request, user_id):
+    """
+    Toggles the 'Super Bonus Mode' for a user's account.
+    """
+    if not request.user.is_staff:
+        return HttpResponseForbidden("You are not authorized to perform this action.")
+
+    user = get_object_or_404(User, id=user_id)
+    profile = get_object_or_404(Profile, client=user)
+
+    # Toggle the Super Bonus Mode
+    profile.super_bonus_mode = not profile.super_bonus_mode
+    profile.save()
+
+    status = "enabled" if profile.super_bonus_mode else "disabled"
+    messages.success(request, f"Super Bonus Mode has been {status} for {user.username}.")
+
+    return redirect('manage-clients')
+
+
+@login_required
+def reset_daily_clicks(request, user_id):
+    """
+    Resets the daily clicks and successful checkouts for the specific user's plan.
+    """
+    if not request.user.is_staff:
+        return HttpResponseForbidden("You are not authorized to perform this action.")
+    
+    user = get_object_or_404(User, id=user_id)
+    profile = get_object_or_404(Profile, client=user)
+
+    if not profile.plan:
+        messages.error(request, f"{user.username} does not have an assigned plan.")
+        return redirect('manage-clients')
+
+    # Access the plan associated with the user
+    plan = profile.plan
+
+    # Reset daily clicks to the plan's number_of_clicks
+    plan.daily_clicks = plan.number_of_clicks  # Reset daily clicks to the plan's number_of_clicks
+    plan.save()
+
+    # Reset successful checkouts to 0
+    profile.successful_checkouts = 0
+    profile.save()
+
+    messages.success(request, f"Daily clicks and successful checkouts for {user.username}'s plan '{plan.name}' have been reset.")
+    return redirect('manage-clients')
+
 
 
 @login_required

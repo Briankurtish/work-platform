@@ -1,0 +1,128 @@
+{% extends layout_path %}
+
+{% load static %}
+{% load i18n %}
+
+{% block title %}Manage Wallets{% endblock title %}
+
+{% block vendor_css %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'vendor/libs/apex-charts/apex-charts.css' %}" />
+<style>
+  /* Custom CSS for positioning the toast at the bottom right */
+  .toast-container {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    z-index: 1050;  /* Ensure it's above other elements */
+  }
+
+  .toast {
+    margin-bottom: 10px;  /* Space between toasts if multiple appear */
+  }
+</style>
+{% endblock vendor_css %}
+
+{% block vendor_js %}
+{{ block.super }}
+<script src="{% static 'vendor/libs/apex-charts/apexcharts.js' %}"></script>
+{% endblock vendor_js %}
+
+{% block page_js %}
+{{ block.super }}
+<script src="{% static 'js/dashboards-analytics.js' %}"></script>
+{% endblock page_js %}
+
+{% block content %}
+<div class="row gy-6">
+  <h3 class="mb-0 flex-wrap text-nowrap">Manage Wallets</h3>
+
+  <div class="row mt-3">
+    <div class="col-md-6">
+      <a href="{% url 'add-wallet' %}">
+      <button type="button" class="btn btn-outline-primary">
+        <span class="tf-icons ri-add-circle-fill ri-16px me-1_5"></span>Add Wallet
+      </button> </a>
+    </div>
+  </div>
+
+  <!-- Hoverable Table rows -->
+  <div class="card">
+    <h5 class="card-header">Wallets</h5>
+    <div class="table-responsive text-nowrap">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>Wallet Name</th>
+            <th>Network</th>
+            <th>Address</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody class="table-border-bottom-0">
+          {% for wallet in wallets %}
+          <tr>
+            <td><span>{{ wallet.name }}</span></td>
+            <td>{{ wallet.network }}</td>
+            <td>{{ wallet.address }}</td>
+            <td>
+              <div class="dropdown">
+                <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                  <i class="ri-more-2-line"></i>
+                </button>
+                <div class="dropdown-menu">
+                  <a class="dropdown-item" href="{% url 'update-wallet' wallet.id %}">
+                    <i class="ri-pencil-line me-1"></i> Edit
+                  </a>
+                  <a class="dropdown-item" href="{% url 'delete-wallet' wallet.id %}">
+                    <i class="ri-delete-bin-6-line me-1"></i> Delete
+                  </a>
+                </div>
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="4" class="text-center">No wallets found. Add a new wallet to get started.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <!--/ Hoverable Table rows -->
+
+  {% if messages %}
+  <!-- Toast container to hold all toasts -->
+  <div class="toast-container">
+    {% for message in messages %}
+      {% if message.tags == "error" %}
+      <!-- Toast for error messages -->
+      <div class="bs-toast toast fade show bg-danger text-white" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header bg-danger text-white">
+          <i class="ri-error-warning-fill text-white me-2"></i>
+          <div class="me-auto fw-medium">Error</div>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+          <p>{{ message }}</p>
+        </div>
+      </div>
+      {% else %}
+      <!-- Toast for success messages -->
+      <div class="bs-toast toast fade show bg-success text-white" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header bg-success text-white">
+          <i class="ri-checkbox-circle-fill text-white me-2"></i>
+          <div class="me-auto fw-medium">Success</div>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+          <p>{{ message }}</p>
+        </div>
+      </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -12,9 +12,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 
 
 class TasksView(LoginRequiredMixin, TemplateView):
-    # Predefined function
     def get_context_data(self, **kwargs):
-        # A function to init the global layout. It is defined in web_project/__init__.py file
+        # Initialize the global layout
         context = TemplateLayout.init(self, super().get_context_data(**kwargs))
         
         # Fetch the logged-in user's profile and plan
@@ -23,50 +22,45 @@ class TasksView(LoginRequiredMixin, TemplateView):
             profile = self.request.user.profile
             
             if profile.plan is None:
-                # If the user has no plan, skip fetching products and set a message
+                # If the user has no plan, set appropriate context
                 context["user_plan"] = None
                 context["random_product"] = None
                 context["no_plan_message"] = "You are not subscribed to any plan. Please subscribe to a plan to view products."
             else:
-                # Total approved deposits
+                # Calculate totals and clicks left
                 context['total_approved_deposits'] = (
                     Deposit.objects.filter(user=user, status='Approved').aggregate(total=Sum('amount'))['total'] or 0
                 )
-                
-                # Add the user's profit to the context
-                context["user_profit"] = profile.profit
-                
-                context["successful_checkouts"] = profile.successful_checkouts
-                
-                clicks_left = profile.plan.number_of_clicks - profile.successful_checkouts
-                context["clicks_left"] = clicks_left
-                
-                # Total approved withdrawals
                 context['total_approved_withdrawals'] = (
                     WithdrawalRequest.objects.filter(user=user, status='approved').aggregate(total=Sum('amount'))['total'] or 0
                 )
+                context["user_profit"] = profile.profit
+                context["successful_checkouts"] = profile.successful_checkouts
+                context["clicks_left"] = profile.plan.daily_clicks - profile.successful_checkouts
                 context["user_plan"] = profile.plan
-                
+
                 # Track previously selected products in session
                 selected_products = self.request.session.get("selected_products", [])
 
-                # Check user's plan to filter products accordingly
-                if profile.plan.name == 'VIP 1':
-                    # For VIP 1 Plan, show only products with price <= 499
-                    products = Product.objects.filter(is_super_bonus=False, price__lte=100).exclude(id__in=selected_products).order_by('?')
-                elif profile.plan.name == 'VIP 2':
-                    # For VIP 2 Plan, show only products with price <= 2000
-                    products = Product.objects.filter(is_super_bonus=False, price__lte=500).exclude(id__in=selected_products).order_by('?')
-                elif profile.plan.name == 'VIP 3':
-                    # For VIP 3 Plan, show only products with price > 5000
-                    products = Product.objects.filter(is_super_bonus=False, price__lte=2000).exclude(id__in=selected_products).order_by('?')
-                elif profile.plan.name == 'VIP 4':
-                    # For VIP 4 Plan, show only products with price >= 5000
-                    products = Product.objects.filter(is_super_bonus=False, price__gte=5000).exclude(id__in=selected_products).order_by('?')
+                # Filter products based on Super Bonus Mode or plan-specific criteria
+                if profile.super_bonus_mode:
+                    # Show only products with `is_super_bonus` set to True
+                    products = Product.objects.filter(is_super_bonus=True).exclude(id__in=selected_products).order_by('?')
                 else:
-                    # Default behavior for other plans (show all)
-                    products = Product.objects.filter(is_super_bonus=False).exclude(id__in=selected_products).order_by('?')
+                    # Show products based on the user's plan
+                    if profile.plan.name == 'VIP 1':
+                        products = Product.objects.filter(is_super_bonus=False, price__lte=100).exclude(id__in=selected_products).order_by('?')
+                    elif profile.plan.name == 'VIP 2':
+                        products = Product.objects.filter(is_super_bonus=False, price__lte=500).exclude(id__in=selected_products).order_by('?')
+                    elif profile.plan.name == 'VIP 3':
+                        products = Product.objects.filter(is_super_bonus=False, price__lte=2000).exclude(id__in=selected_products).order_by('?')
+                    elif profile.plan.name == 'VIP 4':
+                        products = Product.objects.filter(is_super_bonus=False, price__gte=5000).exclude(id__in=selected_products).order_by('?')
+                    else:
+                        # Default behavior for other plans (show all non-super bonus products)
+                        products = Product.objects.filter(is_super_bonus=False).exclude(id__in=selected_products).order_by('?')
 
+                # Select a random product
                 random_product = products.first() if products.exists() else None
                 context["random_product"] = random_product
 
@@ -75,10 +69,11 @@ class TasksView(LoginRequiredMixin, TemplateView):
                     selected_products.append(random_product.id)
                     self.request.session["selected_products"] = selected_products
                 if not products.exists():
+                    # Reset session if no products remain
                     self.request.session["selected_products"] = []
-
         else:
-            context["user_plan"] = None  # No profile or plan
+            # Handle case where the user has no profile
+            context["user_plan"] = None
             context["random_product"] = None
         
         return context
@@ -99,19 +94,21 @@ class TasksView(LoginRequiredMixin, TemplateView):
         user_profile = request.user.profile
         user_balance = Deposit.objects.filter(user=request.user, status='Approved').aggregate(total=Sum('amount'))['total'] or 0
         
+        # Check if the user has enough balance to proceed with the checkout
         if user_balance < product.price:
-            messages.error(request, "Insufficient balance to boost this product.")
+            messages.error(request, "Insufficient balance to boost this product. Please Recharge your account!")
             return redirect('task-panel')
         
+        # Check if the user has reached the maximum number of successful checkouts for today
+        if user_profile.successful_checkouts >= user_profile.plan.daily_clicks:
+            messages.error(request, "You have reached the maximum number of boosts for today.")
+            return redirect('task-panel')
+
         # Proceed with the checkout
-        # Add the product profit to the user's profile
         user_profile.profit += product.profit
         user_profile.successful_checkouts += 1
         user_profile.save()
-        
-        # Optionally, you can track the checkout transaction or update deposit data, if needed
-        
+
         messages.success(request, f"Successfully Boosted the product: {product.name}. Commission added!")
-        
-        # Redirect the user to some success or task panel page
+
         return redirect('task-panel')

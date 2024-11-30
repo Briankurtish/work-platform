@@ -10,6 +10,24 @@
 <link rel="stylesheet" href="{% static  'vendor/css/pages/page-auth.css' %}">
 {% endblock page_css %}
 
+{% block vendor_css %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'vendor/libs/apex-charts/apex-charts.css' %}" />
+<style>
+  /* Custom CSS for positioning the toast at the bottom right */
+  .toast-container {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    z-index: 1050;  /* Ensure it's above other elements */
+  }
+
+  .toast {
+    margin-bottom: 10px;  /* Space between toasts if multiple appear */
+  }
+</style>
+{% endblock vendor_css %}
+
 {% load crispy_forms_tags %}
 
 
@@ -75,7 +93,17 @@
               <span>Create an account</span>
             </a>
           </p>
+          <p class="text-center mb-5">
+            <a href="{% url 'password_reset' %}">
+              <span>Forgot Password?</span>
+            </a>
+          </p>
         </div>
+        <p class="text-center mb-5">
+          <a href="">
+            <span>Contact Customer Support</span>
+          </a>
+        </p>
       </div>
       <!-- /Login -->
       <img src="{% static 'img/illustrations/tree-3.png' %}" alt="auth-tree" class="authentication-image-object-left d-none d-lg-block">
@@ -84,4 +112,37 @@
     </div>
   </div>
 </div>
+
+{% comment %} {% if messages %}
+  <!-- Toast container to hold all toasts -->
+  <div class="toast-container">
+    {% for message in messages %}
+      {% if message.tags == "error" %}
+      <!-- Toast for error messages -->
+      <div class="bs-toast toast fade show bg-danger text-white" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header bg-danger text-white">
+          <i class="ri-error-warning-fill text-white me-2"></i>
+          <div class="me-auto fw-medium">Error</div>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+          <p>{{ message }}</p>
+        </div>
+      </div>
+      {% else %}
+      <!-- Toast for success messages -->
+      <div class="bs-toast toast fade show bg-success text-white" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header bg-success text-white">
+          <i class="ri-checkbox-circle-fill text-white me-2"></i>
+          <div class="me-auto fw-medium">Success</div>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+          <p>{{ message }}</p>
+        </div>
+      </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+  {% endif %} {% endcomment %}
 {% endblock content %}

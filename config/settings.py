@@ -82,6 +82,7 @@ INSTALLED_APPS = [
     "apps.deposit_history",
     "crispy_forms",
     "crispy_bootstrap5",
+    'apps.wallets',
 ]
 
 MIDDLEWARE = [
@@ -228,6 +229,6 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp-relay.brevo.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = '7fc5f2002@smtp-brevo.com'  # Your Brevo login
-EMAIL_HOST_PASSWORD = 'xsmtpsib-6a490a928245060669a7f294e43412d3f64bf5668ce2c7326be781f498d96825-KO3k0S7VnGYqE6wQ'   # Replace with the SMTP password from Brevo
+EMAIL_HOST_USER = '7fc5f2004@smtp-brevo.com'  # Your Brevo login
+EMAIL_HOST_PASSWORD = 'UZbLvm2APhYGQXsS'   # Replace with the SMTP password from Brevo
 DEFAULT_FROM_EMAIL = 'pbyamungo@gmail.com'  # Replace with your verified Brevo email

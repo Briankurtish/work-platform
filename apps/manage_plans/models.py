@@ -7,6 +7,7 @@ class Plan(models.Model):
     profit = models.DecimalField(max_digits=10, decimal_places=2)
     description = models.TextField()
     number_of_clicks = models.PositiveIntegerField(default=10)
+    daily_clicks = models.PositiveIntegerField(default=0)  # New field
 
     def __str__(self):
         return self.name

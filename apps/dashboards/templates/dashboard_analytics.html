@@ -89,7 +89,7 @@
           <div></div>
           <div class="card-body">
             <p class="mb-2">Perform Tasks today to earn</p>
-            <a href="javascript:;" class="btn btn-sm btn-primary">Go to Tasks</a>
+            <a href="{% url 'task-panel'%}" class="btn btn-sm btn-primary">Go to Tasks</a>
           </div>
         </div>
       </div>
@@ -98,12 +98,12 @@
       <div class="col-sm-6">
         <div class="card h-100">
           <div class="card-header pb-0">
-            <h4 class="mb-0">Clicks Left</h4>
+            <h4 class="mb-0">Daily Clicks</h4>
           </div>
           <div></div>
           <div class="card-body">
-            <h5 class="mb-2 text-primary">{{ user_plan.number_of_clicks}} Clicks Left</h5>
-            <p class="mb-2">Remaining clicks left for today</p>
+            <h5 class="mb-2 text-primary">{{ user_plan.daily_clicks}} Clicks</h5>
+            <p class="mb-2">The amount of clicks available for you daily for boosting</p>
 
           </div>
         </div>

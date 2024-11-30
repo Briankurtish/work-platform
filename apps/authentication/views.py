@@ -1,13 +1,15 @@
 from sib_api_v3_sdk import Configuration, ApiClient, TransactionalEmailsApi, SendSmtpEmail
 from sib_api_v3_sdk.rest import ApiException
 from django.contrib import messages
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
 from django.views.generic import TemplateView
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login,authenticate, logout
 from web_project.template_helpers.theme import TemplateHelper
 from .forms import CreateUserForm
 from django.conf import settings
+from django.contrib.auth.views import PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView, PasswordResetCompleteView
+from django.contrib.auth.forms import SetPasswordForm
 
 
 """
@@ -179,3 +181,55 @@ class LogoutView(TemplateView):
         logout(request)
         messages.info(request, "You have been logged out successfully.")
         return redirect('auth-login-basic')  # Redirect to login page or home page (adjust the URL as necessary)
+    
+
+class CustomPasswordResetView(PasswordResetView):
+    template_name = 'forgot_password.html'
+
+    def get_context_data(self, **kwargs):
+        # Get the default context from the parent class
+        context = super().get_context_data(**kwargs)
+        # Add the layout_path context variable
+        context['layout_path'] = TemplateHelper.set_layout("layout_blank.html", {})
+        return context
+
+class CustomPasswordResetViewDone(PasswordResetDoneView):
+    template_name = 'forgot_password.html'
+
+    def get_context_data(self, **kwargs):
+        # Get the default context from the parent class
+        context = super().get_context_data(**kwargs)
+        # Add the layout_path context variable
+        context['layout_path'] = TemplateHelper.set_layout("layout_blank.html", {})
+        return context
+
+class CustomPasswordResetConfirmView(PasswordResetConfirmView):
+    template_name = 'forgot_password.html'
+
+    def get_context_data(self, **kwargs):
+        """
+        Add the layout path and the appropriate form to the context.
+        """
+        # Get the default context from the parent class
+        context = super().get_context_data(**kwargs)
+
+        # Add the layout path context variable
+        context['layout_path'] = TemplateHelper.set_layout("layout_blank.html", {})
+
+        # Get the user from the kwargs (this is automatically set by Django)
+        user = context.get('user')  # This is the user associated with the reset
+
+        # Create the form, passing the user to the form
+        context['form'] = SetPasswordForm(user=user)  # Pass the user to the form
+
+        return context
+    
+class CustomPasswordResetCompleteView(PasswordResetCompleteView):
+    template_name = 'forgot_password.html'
+
+    def get_context_data(self, **kwargs):
+        # Get the default context from the parent class
+        context = super().get_context_data(**kwargs)
+        # Add the layout_path context variable
+        context['layout_path'] = TemplateHelper.set_layout("layout_blank.html", {})
+        return context
