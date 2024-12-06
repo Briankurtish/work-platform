@@ -20,5 +20,5 @@ def save_profile(sender, instance, **kwargs):
     """
     if hasattr(instance, 'profile'):
         # Update the profit value every time the profile is saved
-        instance.profile.profit = 10  # Ensure profit is set to 10 (or whatever default you want)
+        # instance.profile.profit = 10  # Ensure profit is set to 10 (or whatever default you want)
         instance.profile.save()
