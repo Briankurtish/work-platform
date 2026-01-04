@@ -1,0 +1,274 @@
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                    SMARTBOOSTPRO DEPLOYMENT ARCHITECTURE                   ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│                              INTERNET                                    │
+│                    (smartboostpro.com / www)                            │
+└──────────────────────────────┬──────────────────────────────────────────┘
+                               │
+                               │ HTTPS (443) / HTTP (80)
+                               │
+                               ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│                         NGINX WEB SERVER                                 │
+│                         (Version 1.24.0)                                 │
+├─────────────────────────────────────────────────────────────────────────┤
+│  ✓ SSL/TLS Termination (Let's Encrypt)                                 │
+│  ✓ Reverse Proxy to Django                                             │
+│  ✓ Static Files Serving (/static/)                                     │
+│  ✓ Media Files Serving (/media/)                                       │
+│  ✓ Security Headers (HSTS, X-Frame-Options, etc.)                      │
+│  ✓ HTTP to HTTPS Redirect                                              │
+├─────────────────────────────────────────────────────────────────────────┤
+│  Config: /etc/nginx/sites-available/smartboostpro                      │
+│  Logs: /var/log/nginx/access.log, error.log                            │
+└──────────────────────────────┬──────────────────────────────────────────┘
+                               │
+                               │ Proxy Pass
+                               │ http://127.0.0.1:8000
+                               │
+                               ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│                    DJANGO APPLICATION SERVER                             │
+│                    (Django 5.1.3 / Python 3.12.3)                       │
+├─────────────────────────────────────────────────────────────────────────┤
+│  Current: Django Development Server (runserver)                         │
+│  Port: 8000                                                             │
+│  User: root                                                             │
+│  Service: django.service (systemd)                                      │
+│                                                                          │
+│  Recommended: Gunicorn (Production-ready)                               │
+│  Config: gunicorn-cfg.py                                                │
+├─────────────────────────────────────────────────────────────────────────┤
+│  Project Path: /var/www/smartboostpro                                  │
+│  Virtual Env: /var/www/smartboostpro/venv                              │
+│  Settings: /var/www/smartboostpro/config/settings.py                   │
+│  Environment: /var/www/smartboostpro/.env                              │
+└──────────┬────────────────────────────────────┬─────────────────────────┘
+           │                                    │
+           │ Database Queries                   │ File Operations
+           │                                    │
+           ▼                                    ▼
+┌──────────────────────────┐    ┌──────────────────────────────────────┐
+│   POSTGRESQL DATABASE    │    │        FILE STORAGE                  │
+│   (Version 16.11)        │    │                                      │
+├──────────────────────────┤    ├──────────────────────────────────────┤
+│  Database: smartboost    │    │  Static Files:                       │
+│  User: postgres          │    │  /var/www/smartboostpro/staticfiles/ │
+│  Port: 5432              │    │                                      │
+│  Host: localhost         │    │  Media Files:                        │
+│                          │    │  /var/www/smartboostpro/media/       │
+├──────────────────────────┤    │                                      │
+│  Service: postgresql@    │    │  Served by: Nginx                    │
+│           16-main        │    │                                      │
+└──────────────────────────┘    └──────────────────────────────────────┘
+
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                           DATA FLOW DIAGRAM                                ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+User Request → Nginx (443) → Django (8000) → PostgreSQL (5432)
+                  ↓                ↓
+            Static Files      Media Files
+            (Nginx Direct)    (Nginx Direct)
+
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                         SECURITY LAYERS                                    ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+Layer 1: SSL/TLS Encryption (Let's Encrypt)
+         └─ Certificate: /etc/letsencrypt/live/smartboostpro.com/
+         └─ Expiry: 2026-02-21
+         └─ Auto-renewal: Enabled
+
+Layer 2: Nginx Security Headers
+         └─ HSTS (Strict-Transport-Security)
+         └─ X-Content-Type-Options: nosniff
+         └─ X-Frame-Options: SAMEORIGIN
+         └─ X-XSS-Protection
+
+Layer 3: Django Security
+         └─ CSRF Protection
+         └─ SQL Injection Protection
+         └─ XSS Protection
+         └─ Secure Password Hashing
+
+Layer 4: Environment Variables
+         └─ Credentials in .env (gitignored)
+         └─ No hardcoded secrets
+         └─ File permissions: 600
+
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                       DEPLOYMENT COMPONENTS                                ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│  SYSTEMD SERVICES                                                        │
+├─────────────────────────────────────────────────────────────────────────┤
+│  • django.service          → Django Application                         │
+│  • nginx.service           → Web Server                                 │
+│  • postgresql@16-main      → Database Server                            │
+└─────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│  AUTOMATION SCRIPTS                                                      │
+├─────────────────────────────────────────────────────────────────────────┤
+│  • deploy.sh               → Automated deployment                       │
+│  • backup.sh               → Automated backups                          │
+└─────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│  DOCUMENTATION                                                           │
+├─────────────────────────────────────────────────────────────────────────┤
+│  • DEPLOYMENT_GUIDE.md     → Complete deployment instructions           │
+│  • QUICK_REFERENCE.md      → Quick command reference                    │
+│  • DEPLOYMENT_SUMMARY.md   → Architecture overview                      │
+│  • ARCHITECTURE.txt        → This file                                  │
+└─────────────────────────────────────────────────────────────────────────┘
+
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                         NETWORK TOPOLOGY                                   ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+External Network (Internet)
+    │
+    ├─ Port 80  (HTTP)  → Nginx → Redirect to HTTPS
+    ├─ Port 443 (HTTPS) → Nginx → Proxy to Django
+    │
+Internal Network (localhost)
+    │
+    ├─ Port 8000 → Django Application
+    └─ Port 5432 → PostgreSQL Database
+
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                      APPLICATION STRUCTURE                                 ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+/var/www/smartboostpro/
+│
+├── apps/                     # Django Applications
+│   ├── authentication/       # User auth & registration
+│   ├── clients/             # Client management
+│   ├── dashboard_admin/     # Admin dashboard
+│   ├── manage_deposits/     # Deposit handling
+│   ├── manage_withdrawals/  # Withdrawal handling
+│   ├── manage_plans/        # Subscription plans
+│   ├── manage_products/     # Product catalog
+│   ├── tasks/               # Task management
+│   ├── wallets/             # Wallet system
+│   └── ... (more apps)
+│
+├── config/                   # Django Configuration
+│   ├── settings.py          # ✓ Secured with env vars
+│   ├── urls.py              # URL routing
+│   └── wsgi.py              # WSGI entry point
+│
+├── media/                    # User Uploads
+│   ├── products/            # Product images
+│   └── proof_of_payment/    # Payment proofs
+│
+├── staticfiles/             # Production Static Files
+│   ├── admin/               # Django admin assets
+│   ├── css/                 # Stylesheets
+│   ├── js/                  # JavaScript
+│   └── vendor/              # Third-party libraries
+│
+├── templates/               # HTML Templates
+│   ├── layout/              # Base layouts
+│   └── partials/            # Reusable components
+│
+├── venv/                    # Python Virtual Environment
+│
+├── .env                     # ✓ Environment Variables (SECURED)
+├── .gitignore               # ✓ Git ignore rules
+├── manage.py                # Django CLI
+├── requirements.txt         # Python dependencies
+├── gunicorn-cfg.py         # Gunicorn config
+│
+├── deploy.sh                # Deployment automation
+├── backup.sh                # Backup automation
+│
+└── Documentation/
+    ├── DEPLOYMENT_GUIDE.md
+    ├── QUICK_REFERENCE.md
+    ├── DEPLOYMENT_SUMMARY.md
+    └── ARCHITECTURE.txt
+
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                       DEPLOYMENT CHECKLIST                                 ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+✅ Server Setup
+   ✓ Ubuntu 24.04 LTS installed
+   ✓ Python 3.12.3 installed
+   ✓ PostgreSQL 16.11 installed
+   ✓ Nginx 1.24.0 installed
+
+✅ Application Setup
+   ✓ Project deployed to /var/www/smartboostpro
+   ✓ Virtual environment created
+   ✓ Dependencies installed
+   ✓ Database configured
+   ✓ Migrations applied
+
+✅ Security
+   ✓ SSL certificate installed (Let's Encrypt)
+   ✓ Environment variables secured
+   ✓ .env file gitignored
+   ✓ Security headers configured
+   ✓ HTTPS redirect enabled
+
+✅ Services
+   ✓ Nginx running
+   ✓ PostgreSQL running
+   ✓ Django application running
+
+✅ Documentation
+   ✓ Deployment guide created
+   ✓ Quick reference created
+   ✓ Architecture documented
+   ✓ Automation scripts created
+
+⚠️  Recommended Improvements
+   ⚠ Switch to Gunicorn (production-ready)
+   ⚠ Setup automated backups
+   ⚠ Configure monitoring
+   ⚠ Implement log rotation
+   ⚠ Add Redis caching
+   ⚠ Setup firewall (UFW)
+
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                      QUICK COMMAND REFERENCE                               ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+Deploy Updates:
+  $ sudo /var/www/smartboostpro/deploy.sh
+
+Backup Database:
+  $ sudo /var/www/smartboostpro/backup.sh
+
+Restart Services:
+  $ sudo systemctl restart django.service nginx
+
+View Logs:
+  $ sudo journalctl -u django.service -f
+  $ sudo tail -f /var/log/nginx/error.log
+
+Check Status:
+  $ systemctl status django.service nginx postgresql
+
+
+═══════════════════════════════════════════════════════════════════════════
+Last Updated: January 4, 2026
+Version: 1.0
+Server IP: 109.176.198.41
+Domain: smartboostpro.com
+═══════════════════════════════════════════════════════════════════════════
