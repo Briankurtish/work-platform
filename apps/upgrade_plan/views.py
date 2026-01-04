@@ -8,6 +8,7 @@ from apps.clients.models import Profile  # Adjust based on your project structur
 from sib_api_v3_sdk import Configuration, ApiClient, TransactionalEmailsApi, SendSmtpEmail
 from sib_api_v3_sdk.rest import ApiException
 from django.conf import settings
+from django.core.mail import send_mail
 
 class UpgradePlanView(LoginRequiredMixin, TemplateView):
     template_name = "upgrade_plan.html"  # Replace with the actual template file
@@ -72,16 +73,9 @@ class UpgradePlanView(LoginRequiredMixin, TemplateView):
     def notify_user(self, profile, plan):
         """Send a notification email to the user about the plan they subscribed to."""
         try:
-            # Set up the email configuration
-            configuration = Configuration()
-            configuration.api_key['api-key'] = settings.BREVO_API_KEY  # Replace with your actual API key
-            
-            api_instance = TransactionalEmailsApi(ApiClient(configuration))
             subject = "Your Subscription Plan Update"
-            sender = {"name": "SmartBoostPro", "email": "pbyamungo@gmail.com"}  # Replace with your verified email
-            recipient = [{"email": profile.client.email}]  # Dynamically get the user's email
-            
-            html_content = f"""
+            recipient_email = profile.client.email
+            body = f"""
             <p>Dear {profile.client.username},</p>
             <p>You have successfully subscribed to the <strong>{plan.name}</strong> plan.</p>
             <p>Your new plan will take effect immediately, and we hope it helps you reach your goals.</p>
@@ -89,13 +83,13 @@ class UpgradePlanView(LoginRequiredMixin, TemplateView):
             <p>Thank you for being a part of our community!</p>
             """
 
-            send_smtp_email = SendSmtpEmail(
-                to=recipient,
-                sender=sender,
-                subject=subject,
-                html_content=html_content,
+            # Send email using Django's send_mail function
+            send_mail(
+                subject,
+                "",  # Plain text content (leave empty since we're using HTML)
+                None,  # Sender email is picked from DEFAULT_FROM_EMAIL
+                [recipient_email],  # List of recipients
+                html_message=body,  # HTML content
             )
-
-            api_instance.send_transac_email(send_smtp_email)
-        except ApiException as e:
+        except Exception as e:
             messages.warning(self.request, f"Failed to notify the user: {e}")

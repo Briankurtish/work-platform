@@ -7,6 +7,7 @@ from django.shortcuts import redirect, get_object_or_404
 from django.contrib import messages
 from apps.recharge_account.models import Deposit
 from django.db.models import Sum
+from django.core.mail import send_mail
 
 class ManageDepositsView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     template_name = "manage_deposits.html"
@@ -79,14 +80,11 @@ class ManageDepositsView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     def notify_user(self, deposit, status):
         """Send notification email to the user about the deposit status."""
         try:
-            configuration = Configuration()
-            configuration.api_key['api-key'] = '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'  # Replace with your actual API key
-            
-            api_instance = TransactionalEmailsApi(ApiClient(configuration))
             subject = "Your Deposit Request Update"
-            sender = {"name": "SmartBoostPro", "email": "pbyamungo@gmail.com"}  # Replace with your verified email
-            recipient = [{"email": deposit.user.email}]  # Dynamically get user's email
-            
+            sender_email = "SmartBoostPro <info@smartboostpro.com>"  # Your Hostinger email
+            recipient_email = deposit.user.email  # Dynamically fetch user's email
+
+            # Generate HTML content based on status
             if status == "approved":
                 html_content = f"""
                 <p>Dear {deposit.user.username},</p>
@@ -98,14 +96,15 @@ class ManageDepositsView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
                 <p>Dear {deposit.user.username},</p>
                 <p>Unfortunately, your deposit request of <strong>${deposit.amount}</strong> has been rejected.</p>
                 """
-            
-            send_smtp_email = SendSmtpEmail(
-                to=recipient,
-                sender=sender,
-                subject=subject,
-                html_content=html_content,
+
+            # Send email using Django's send_mail function
+            send_mail(
+                subject,
+                "",  # Plain text content (leave empty since we're using HTML)
+                sender_email,  # Sender email from Hostinger
+                [recipient_email],  # List of recipients
+                html_message=html_content,  # HTML content
             )
-            
-            api_instance.send_transac_email(send_smtp_email)
-        except ApiException as e:
+        except Exception as e:
+            # Log error and notify admin or user if needed
             messages.warning(self.request, f"Failed to notify the user: {e}")

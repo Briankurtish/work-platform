@@ -14,6 +14,7 @@ class Profile(models.Model):
     plan = models.ForeignKey(PlanModel, on_delete=models.SET_NULL, null=True, blank=True)
     profit = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)  # Added profit field
     successful_checkouts = models.IntegerField(default=0)  # Track successful checkouts
+    daily_checkouts = models.IntegerField(default=0)  # Track daily checkouts
     super_bonus_mode = models.BooleanField(default=False)
     
     def __str__(self):

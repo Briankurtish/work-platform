@@ -7,6 +7,7 @@ from apps.withdraw.models import WithdrawalRequest  # Assuming WithdrawalRequest
 from apps.clients.models import Profile  # Assuming Profile model
 from sib_api_v3_sdk import Configuration, ApiClient, TransactionalEmailsApi, SendSmtpEmail
 from sib_api_v3_sdk.rest import ApiException
+from django.core.mail import send_mail
 
 class ManageWithdrawalsView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     template_name = "manage_withdrawals.html"  # Your template for managing withdrawals
@@ -71,14 +72,11 @@ class ManageWithdrawalsView(LoginRequiredMixin, UserPassesTestMixin, TemplateVie
     def notify_user(self, withdrawal, status):
         """Send notification email to the user about the withdrawal status."""
         try:
-            configuration = Configuration()
-            configuration.api_key['api-key'] = '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'  # Replace with your actual API key
-            
-            api_instance = TransactionalEmailsApi(ApiClient(configuration))
             subject = "Your Withdrawal Request Update"
-            sender = {"name": "SmartBoostPro", "email": "pbyamungo@gmail.com"}  # Replace with your verified email
-            recipient = [{"email": withdrawal.user.email}]  # Dynamically get user's email
-            
+            sender_email = "SmartBoostPro <info@smartboostpro.com>"  # Your Hostinger email
+            recipient_email = withdrawal.user.email  # Dynamically fetch user's email
+
+            # Generate HTML content based on status
             if status == "approved":
                 html_content = f"""
                 <p>Dear {withdrawal.user.username},</p>
@@ -90,14 +88,15 @@ class ManageWithdrawalsView(LoginRequiredMixin, UserPassesTestMixin, TemplateVie
                 <p>Dear {withdrawal.user.username},</p>
                 <p>Unfortunately, your withdrawal request of <strong>${withdrawal.amount}</strong> has been rejected.</p>
                 """
-            
-            send_smtp_email = SendSmtpEmail(
-                to=recipient,
-                sender=sender,
-                subject=subject,
-                html_content=html_content,
+
+            # Send email using Django's send_mail function
+            send_mail(
+                subject,
+                "",  # Plain text content (leave empty since we're using HTML)
+                sender_email,  # Sender email from Hostinger
+                [recipient_email],  # List of recipients
+                html_message=html_content,  # HTML content
             )
-            
-            api_instance.send_transac_email(send_smtp_email)
-        except ApiException as e:
+        except Exception as e:
+            # Log error and notify admin or user if needed
             messages.warning(self.request, f"Failed to notify the user: {e}")

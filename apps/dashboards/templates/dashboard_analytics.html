@@ -33,7 +33,8 @@
         <p class="mb-2">Amount available in your account</p>
         <h4 class="text-primary mb-0">${{ user_balance }}</h4>
         <br>
-        <a href="javascript:;" class="btn btn-sm btn-primary">Topup Account</a>
+        <a href="{% url 'recharge_account' %}" class="btn btn-sm btn-primary">Topup Account</a>
+        <a href="{% url 'withdraw_deposit' %}" class="btn btn-sm btn-primary">Withdraw Balance</a>
       </div>
       <img src="{% static 'img/illustrations/walletp.png' %}" class="position-absolute bottom-0 end-0 me-5 mb-5" width="83" alt="view sales">
     </div>
@@ -48,7 +49,7 @@
         <p class="mb-2">Amount available in your account</p>
         <h4 class="text-primary mb-0">${{ user_profit }}</h4>
         <br>
-        <a href="javascript:;" class="btn btn-sm btn-primary">Withdraw</a>
+        <a href="{% url 'withdraw' %}" class="btn btn-sm btn-primary">Withdraw</a>
       </div>
       <img src="{% static 'img/illustrations/deposits.png' %}" class="position-absolute bottom-0 end-0 me-5 mb-5" width="83" alt="view sales">
     </div>

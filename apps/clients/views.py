@@ -13,6 +13,8 @@ import sib_api_v3_sdk
 from sib_api_v3_sdk.rest import ApiException
 from apps.recharge_account.models import Deposit
 from apps.manage_products.models import Product
+from django.core.mail import send_mail
+from django.conf import settings 
 
 
 
@@ -129,31 +131,25 @@ def top_up_balance(request, user_id):
 
             # Notify the admin via email
             try:
-                configuration = sib_api_v3_sdk.Configuration()
-                configuration.api_key['api-key'] = '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'
-
-                api_instance = sib_api_v3_sdk.TransactionalEmailsApi(sib_api_v3_sdk.ApiClient(configuration))
-                subject = "New Deposit Request for Admin Approval"
-                sender = {"name": "SmartBoostPro", "email": "pbyamungo@gmail.com"}  # Replace with your verified email
-                recipient = [{"email": "asaforbrn18@gmail.com"}]  # Admin email
-
-                html_content = f"""
-                <p>A deposit request has been created by the admin for the following user:</p>
+                subject = "New Deposit Request by Admin"
+                sender_email = "SmartBoostPro <info@smartboostpro.com>"  
+                recipient_email = "info@smartboostpro.com"  # Replace with admin email
+                body = f"""
+                <p>A new deposit request by Admin has been submitted:</p>
                 <ul>
-                    <li>User: {user.username}</li>
-                    <li>Amount: ${balance_top_up}</li>
-                    <li>Status: Pending</li>
+                    <li>User: {request.user.username}</li>
+                    <li>Amount: ${amount}</li>
                 </ul>
                 """
-
-                send_smtp_email = sib_api_v3_sdk.SendSmtpEmail(
-                    to=recipient,
-                    sender=sender,
-                    subject=subject,
-                    html_content=html_content,
+                
+                # Send the email using Django's send_mail function
+                send_mail(
+                    subject,
+                    body,
+                    sender_email,  # Sender email from settings
+                    [recipient_email],  # List of recipients
+                    html_message=body,  # HTML content
                 )
-                api_instance.send_transac_email(send_smtp_email)
-
             except ApiException as e:
                 messages.warning(request, f"Failed to send notification email: {e}")
 
@@ -209,11 +205,11 @@ def reset_daily_clicks(request, user_id):
     plan.daily_clicks = plan.number_of_clicks  # Reset daily clicks to the plan's number_of_clicks
     plan.save()
 
-    # Reset successful checkouts to 0
-    profile.successful_checkouts = 0
+    # Reset daily checkouts to 0
+    profile.daily_checkouts = 0
     profile.save()
 
-    messages.success(request, f"Daily clicks and successful checkouts for {user.username}'s plan '{plan.name}' have been reset.")
+    messages.success(request, f"Daily clicks and Daily Boosts for {user.username}'s plan '{plan.name}' have been reset.")
     return redirect('manage-clients')
 
 

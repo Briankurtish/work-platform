@@ -42,38 +42,31 @@ class RechargeAccountView(LoginRequiredMixin, TemplateView):
         )
 
         
-    # Send email to admin
+        # Send email notification to admin
         try:
-            configuration = sib_api_v3_sdk.Configuration()
-            configuration.api_key['api-key'] = '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'  # Replace with your actual API key
-            
-            api_instance = sib_api_v3_sdk.TransactionalEmailsApi(sib_api_v3_sdk.ApiClient(configuration))
-            
             subject = "New Deposit Request"
-            sender = {"name": "SmartBoostPro", "email": "pbyamungo@gmail.com"}  # Replace with your verified email
-            recipient = [{"email": "asaforbrn18@gmail.com"}]  # Admin email
-            
-            html_content = f"""
+            sender_email = "SmartBoostPro <info@smartboostpro.com>"  
+            recipient_email = "info@smartboostpro.com"  # Replace with admin email
+            body = f"""
             <p>A new deposit request has been submitted:</p>
             <ul>
-                <li>User: {user.username}</li>
+                <li>User: {request.user.username}</li>
                 <li>Amount: ${amount}</li>
                 <li>Crypto Wallet: {crypto_wallet}</li>
             </ul>
             """
             
-            send_smtp_email = sib_api_v3_sdk.SendSmtpEmail(
-                to=recipient,
-                sender=sender,
-                subject=subject,
-                html_content=html_content,
+            # Send the email using Django's send_mail function
+            send_mail(
+                subject,
+                body,
+                sender_email,  # Sender email from settings
+                [recipient_email],  # List of recipients
+                html_message=body,  # HTML content
             )
             
-            api_instance.send_transac_email(send_smtp_email)
-            messages.success(request, "Your recharge request has been submitted successfully.", extra_tags='recharge_account')
-        
-        except ApiException as e:
-            messages.error(request, f"Failed to notify the admin: {e}")
+        except Exception as e:
+            messages.warning(request, f"Failed to notify admin about the deposit request: {e}")
 
         # Redirect back to the recharge account page
         return redirect('recharge_account')

@@ -42,10 +42,18 @@ DEBUG = os.environ.get("DEBUG", 'False').lower() in ['true', 'yes', '1']
 
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#allowed-hosts
-ALLOWED_HOSTS = ["localhost", "0.0.0.0", "127.0.0.1"]
+ALLOWED_HOSTS = ["localhost", "0.0.0.0", "127.0.0.1", "109.176.198.41", "smartboostpro.com"]
 
 # Current DJANGO_ENVIRONMENT
 ENVIRONMENT = os.environ.get("DJANGO_ENVIRONMENT", default="local")
+
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://smartboostpro.com',
+    'https://www.smartboostpro.com',
+]
+
+
 
 
 # Application definition
@@ -138,12 +146,15 @@ WSGI_APPLICATION = "config.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": 'smartboost',
-        "USER": 'cipher',
-        "PASSWORD": 'cipher',
+        "USER": 'postgres',
+        "PASSWORD": 'password2023#',
+        "HOST": 'localhost',  # or the IP of the server
+        "PORT": '5432',       # default PostgreSQL port
     }
 }
 
@@ -187,16 +198,16 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
-STATIC_URL = "/static/"
-STATIC_ROOT = BASE_DIR / "staticfiles"
 
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 STATICFILES_DIRS = [
-    BASE_DIR / "src" / "assets",
+    BASE_DIR / 'src' / 'assets',  # Adjust based on your folder structure
 ]
 
 # Default URL on which Django application runs for specific environment
-BASE_URL = os.environ.get("BASE_URL", default="http://127.0.0.1:8000")
+BASE_URL = os.environ.get("BASE_URL", default="http://109.176.198.41")
 
 
 # Default primary key field type
@@ -222,13 +233,12 @@ LOGIN_REDIRECT_URL = 'index-admin'
 
 LOGIN_URL = 'auth-login-basic'
 
-ADMIN_EMAIL = 'asaforbrn18@gmail.com'  # Replace with the admin's email address
-BREVO_API_KEY = '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'
+# settings.py
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp-relay.brevo.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = '7fc5f2004@smtp-brevo.com'  # Your Brevo login
-EMAIL_HOST_PASSWORD = 'UZbLvm2APhYGQXsS'   # Replace with the SMTP password from Brevo
-DEFAULT_FROM_EMAIL = 'pbyamungo@gmail.com'  # Replace with your verified Brevo email
+EMAIL_HOST = 'smtp.hostinger.com'  # Hostinger SMTP server
+EMAIL_PORT = 587  # Port for TLS
+EMAIL_USE_TLS = True  # Enable TLS
+EMAIL_HOST_USER = 'info@smartboostpro.com'  # Your Hostinger email address
+EMAIL_HOST_PASSWORD = 'Password2023#@#'  # Your Hostinger email password
+DEFAULT_FROM_EMAIL = "SmartBoostPro <info@smartboostpro.com>"  # Default sender email

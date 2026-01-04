@@ -7,9 +7,11 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login,authenticate, logout
 from web_project.template_helpers.theme import TemplateHelper
 from .forms import CreateUserForm
-from django.conf import settings
 from django.contrib.auth.views import PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView, PasswordResetCompleteView
 from django.contrib.auth.forms import SetPasswordForm
+from django.core.mail import EmailMessage
+from django.conf import settings
+from django.contrib import messages
 
 
 """
@@ -61,16 +63,11 @@ class AuthView(TemplateView):
         return self.render_to_response(context)
 
     def send_email_to_client(self, user):
-        """Send a confirmation email to the client."""
+        """Send a confirmation email to the client using Hostinger SMTP."""
         try:
-            # Set up Brevo API configuration
-            configuration = Configuration()
-            configuration.api_key['api-key'] = settings.BREVO_API_KEY  # Store your API key in settings.py
-            
-            api_instance = TransactionalEmailsApi(ApiClient(configuration))
             subject = "Welcome to SmartBoostPro"
-            sender = {"name": "SmartBoostPro", "email": "pbyamungo@gmail.com"}  # Use your verified email
-            recipient = [{"email": user.email}]
+            sender_email = "SmartBoostPro <info@smartboostpro.com>"  # Add your custom name and email
+            recipient_email = user.email
             
             html_content = f"""
             <p>Dear {user.username},</p>
@@ -79,28 +76,25 @@ class AuthView(TemplateView):
             <p>Thank you for joining!</p>
             """
             
-            send_smtp_email = SendSmtpEmail(
-                to=recipient,
-                sender=sender,
+            # Create an email message object
+            email = EmailMessage(
                 subject=subject,
-                html_content=html_content,
+                body=html_content,
+                from_email=sender_email,  # Custom "From" name with email
+                to=[recipient_email],
             )
-            
-            api_instance.send_transac_email(send_smtp_email)
-        except ApiException as e:
+            email.content_subtype = "html"
+            email.send()
+        except Exception as e:
             messages.warning(self.request, f"Failed to send email to client: {e}")
 
+
     def send_email_to_admin(self, user):
-        """Send a notification email to the admin about the new user."""
+        """Send a notification email to the admin about the new user using Hostinger SMTP."""
         try:
-            # Set up Brevo API configuration
-            configuration = Configuration()
-            configuration.api_key['api-key'] = settings.BREVO_API_KEY  # Store your API key in settings.py
-            
-            api_instance = TransactionalEmailsApi(ApiClient(configuration))
             subject = "New User Registration"
-            sender = {"name": "SmartBoostPro", "email": "pbyamungo@gmail.com"}  # Use your verified email
-            recipient = [{"email": "asaforbrn18@gmail.com"}]  # Use your admin's email
+            sender_email = "SmartBoostPro <info@smartboostpro.com>"  # Add your custom name and email
+            admin_email = settings.EMAIL_HOST_USER
             
             html_content = f"""
             <p>Dear Admin,</p>
@@ -110,17 +104,18 @@ class AuthView(TemplateView):
             <p>Thank you for using SmartBoostPro!</p>
             """
             
-            send_smtp_email = SendSmtpEmail(
-                to=recipient,
-                sender=sender,
+            email = EmailMessage(
                 subject=subject,
-                html_content=html_content,
+                body=html_content,
+                from_email=sender_email,  # Custom "From" name with email
+                to=[admin_email],
             )
-            
-            api_instance.send_transac_email(send_smtp_email)
-        except ApiException as e:
+            email.content_subtype = "html"
+            email.send()
+        except Exception as e:
             messages.warning(self.request, f"Failed to send email to admin: {e}")
 
+            
 
 class LoginView(TemplateView):
     template_name = 'user/login.html'  # The template to render for this view

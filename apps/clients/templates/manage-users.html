@@ -49,7 +49,10 @@
               <th>Last Name</th>
               <th>Email</th>
               <th>Balance</th>
-              <th>Daily Clicks</th>
+              <th>Total Profit</th>
+              <th>Daily Plan Clicks</th>
+              <th>Daily Boots</th>
+              <th>Total Boosts</th>
               <th>Active Status</th>
               <th>Super Mode</th>
               <th>Actions</th>
@@ -63,9 +66,16 @@
               <td>{{ client.last_name }}</td>
               <td>{{ client.email }}</td>
               <td>${{ client.profile.balance }}</td>
+              <td>${{ client.profile.profit }}</td>
               <td>
                 {{ client.profile.plan.daily_clicks }}
-            </td>
+              </td>
+              <td>
+                {{ client.profile.daily_checkouts }}
+              </td>
+              <td>
+                {{ client.profile.successful_checkouts }}
+              </td>
               <td>
                   {% if client.is_active %}
                   <span class="badge rounded-pill bg-label-primary me-1">Active</span>

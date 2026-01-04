@@ -36,7 +36,8 @@ class TasksView(LoginRequiredMixin, TemplateView):
                 )
                 context["user_profit"] = profile.profit
                 context["successful_checkouts"] = profile.successful_checkouts
-                context["clicks_left"] = profile.plan.daily_clicks - profile.successful_checkouts
+                context["daily_checkouts"] = profile.daily_checkouts
+                context["clicks_left"] = profile.plan.daily_clicks - profile.daily_checkouts
                 context["user_plan"] = profile.plan
 
                 # Track previously selected products in session
@@ -100,13 +101,14 @@ class TasksView(LoginRequiredMixin, TemplateView):
             return redirect('task-panel')
         
         # Check if the user has reached the maximum number of successful checkouts for today
-        if user_profile.successful_checkouts >= user_profile.plan.daily_clicks:
+        if user_profile.daily_checkouts >= user_profile.plan.daily_clicks:
             messages.error(request, "You have reached the maximum number of boosts for today.")
             return redirect('task-panel')
 
         # Proceed with the checkout
         user_profile.profit += product.profit
         user_profile.successful_checkouts += 1
+        user_profile.daily_checkouts += 1
         user_profile.save()
 
         messages.success(request, f"Successfully Boosted the product: {product.name}. Commission added!")
