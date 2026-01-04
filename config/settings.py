@@ -150,11 +150,11 @@ WSGI_APPLICATION = "config.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": 'smartboost',
-        "USER": 'postgres',
-        "PASSWORD": 'password2023#',
-        "HOST": 'localhost',  # or the IP of the server
-        "PORT": '5432',       # default PostgreSQL port
+        "NAME": os.environ.get("DB_NAME", 'smartboost'),
+        "USER": os.environ.get("DB_USER", 'postgres'),
+        "PASSWORD": os.environ.get("DB_PASSWORD", ''),
+        "HOST": os.environ.get("DB_HOST", 'localhost'),
+        "PORT": os.environ.get("DB_PORT", '5432'),
     }
 }
 
@@ -233,12 +233,12 @@ LOGIN_REDIRECT_URL = 'index-admin'
 
 LOGIN_URL = 'auth-login-basic'
 
-# settings.py
-
+# Email Configuration
+# ------------------------------------------------------------------------------
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.hostinger.com'  # Hostinger SMTP server
-EMAIL_PORT = 587  # Port for TLS
-EMAIL_USE_TLS = True  # Enable TLS
-EMAIL_HOST_USER = 'info@smartboostpro.com'  # Your Hostinger email address
-EMAIL_HOST_PASSWORD = 'Password2023#@#'  # Your Hostinger email password
-DEFAULT_FROM_EMAIL = "SmartBoostPro <info@smartboostpro.com>"  # Default sender email
+EMAIL_HOST = os.environ.get("EMAIL_HOST", 'smtp.hostinger.com')
+EMAIL_PORT = int(os.environ.get("EMAIL_PORT", 587))
+EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", 'True').lower() in ['true', 'yes', '1']
+EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", '')
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", '')
+DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "SmartBoostPro <info@smartboostpro.com>")
